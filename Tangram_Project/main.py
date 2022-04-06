@@ -6,7 +6,6 @@ from random import randrange
 import os
 import pickle
 
-
 # Fonctions
 from math import sqrt
 
@@ -17,7 +16,36 @@ def distance(p1, p2):
     return dist
 
 
-def detection():
+def geometry_fenetre(_fen: Tk | Toplevel, _diff_x, _diff_y):
+    _pos_x, _pos_y = _fen.winfo_screenwidth(), _fen.winfo_screenheight()
+    _x = int((_pos_x / 2) - (_diff_x / 2))
+    _y = int((_pos_y / 2) - (_diff_y / 2))
+    _fen.geometry(f'{_diff_x}x{_diff_y}+{_x}+{_y}')
+
+
+def fin_niveau_tangram():
+    fen3 = Toplevel()
+    fen3.title("Bravo !")
+
+    fond = Label(fen3, image=image6)
+    # Initialisation d'une fenêtre qui a un fond que l'on affiche grâce à un label
+    #  (qui est ici une image)
+    res = Button(fond, image=image7, command=lambda: [restart(),
+                                                      fen3.destroy()
+                                                      ]
+                 )
+    by = Button(fond, image=image8, command=fen.quit)
+
+    # création d'un bouton recommencer et d'un bouton quitter (qui quitte le jeu entièrement)
+
+    fond.pack()
+    res.place(x=xres, y=yres)
+    by.place(x=xby, y=yby)
+    geometry_fenetre(fen3, T_fen_end, T_fen_end2)
+    # affichage et centrage de la fenêtre.
+
+
+def detection_fin():
     """Cette fonction détecte si le niveau est terminé ou non"""
     test = True
     # on initialise le test comme étant vrai, si l'une des conditions du niveau n'est pas remplie
@@ -25,148 +53,71 @@ def detection():
     for i, pt in enumerate(tabl_end):
 
         # premier test : les positions.
-        if i == 0:
-            if distance(tabl[0], pt) <= 5 or distance(tabl[1], pt) <= 5:
+        if i == 0 or i == 1:
+            if distance(tabl[i], pt) <= 5 or distance(tabl[1-i], pt) <= 5:
                 d1 = distance(tabl[0], pt)
                 d2 = distance(tabl[1], pt)
                 if d1 < d2:
-                    C_tri1.goto(tabl_end[0])
+                    dict_piece['tri1'].goto(tabl_end[i])
                 elif d1 - d2 < 5:
-                    C_tri1.goto(tabl_end[0])
-                    C_tri2.goto(tabl_end[0])
+                    dict_piece['tri1'].goto(tabl_end[i])
+                    dict_piece['tri2'].goto(tabl_end[i])
                 else:
-                    C_tri2.goto(tabl_end[0])
+                    dict_piece['tri2'].goto(tabl_end[i])
             else:
-                test = False
-
-        if i == 1:
-            if distance(tabl[1], pt) <= 5 or distance(tabl[0], pt) <= 5:
-                d1 = distance(tabl[0], pt)
-                d2 = distance(tabl[1], pt)
-                if d1 < d2:
-                    C_tri1.goto(tabl_end[1])
-                elif d1 - d2 < 5:
-                    C_tri1.goto(tabl_end[1])
-                    C_tri2.goto(tabl_end[1])
-                else:
-                    C_tri2.goto(tabl_end[1])
-            else:
-                test = False
+                return
                 # les deux grands triangles
 
-        if i == 3:
-            if distance(tabl[3], pt) <= 5 or distance(tabl[4], pt) <= 5:
+        if i == 3 or i == 4:
+            if distance(tabl[i], pt) <= 5 or distance(tabl[7-i], pt) <= 5:
                 d1 = distance(tabl[3], pt)
                 d2 = distance(tabl[4], pt)
                 if d1 < d2:
-                    C_tripe1.goto(tabl_end[3])
+                    dict_piece['tripe1'].goto(tabl_end[i])
                 elif d1 - d2 < 5:
-                    C_tripe1.goto(tabl_end[3])
-                    C_tripe2.goto(tabl_end[3])
+                    dict_piece['tripe1'].goto(tabl_end[i])
+                    dict_piece['tripe2'].goto(tabl_end[i])
                 else:
-                    C_tripe2.goto(tabl_end[3])
+                    dict_piece['tripe2'].goto(tabl_end[i])
             else:
-                test = False
-
-        if i == 4:
-            if distance(tabl[4], pt) <= 5 or distance(tabl[3], pt) <= 5:
-                d1 = distance(tabl[3], pt)
-                d2 = distance(tabl[4], pt)
-                if d1 < d2:
-                    C_tripe1.goto(tabl_end[4])
-                elif d1 - d2 < 5:
-                    C_tripe1.goto(tabl_end[4])
-                    C_tripe2.goto(tabl_end[4])
-                else:
-                    C_tripe2.goto(tabl_end[4])
-            else:
-                test = False
+                return
                 # les deux petits triangles
 
-                # Ces 4 premiers tests sont plus complexes car on ne sait pas quel triangle
+                # Ces 4 premiers tests sont plus complexes, car on ne sait pas quel triangle
                 #  le joueur va choisir (2 emplacements pour chaque triangle).
 
-        if i == 2:
+        if i == 2 or i == 5 or i == 6:
             if distance(tabl[i], pt) <= 5:
-                C_trimoy.goto(pt)
+                dict_piece[name_pieces[i]].goto(pt)
             else:
-                test = False
-                # le triangle moyen
+                return
+                # le triangle moyen, le carré et le parallélogramme
 
-        if i == 5:
-            if distance(tabl[i], pt) <= 5:
-                C_carre.goto(pt)
-            else:
-                test = False
-                # le carré
-
-        if i == 6:
-            if distance(tabl[i], pt) <= 5:
-                C_para.goto(pt)
-            else:
-                test = False
-                # le parallélogramme
-
-                # Cette première partie fait donc en sorte qu'un élément a une distance > à 5
+                # Cette première partie fait donc en sorte qu'un élément a une distance < à 5
                 #  de sa position finale se met à celle-ci
 
     for i, cpt in enumerate(comp):
-        if i == 0:
+        if i == 0 or i == 1:
             if cpt != comp_end[0] and cpt != comp_end[1]:
-                test = False
-        if i == 1:
-            if cpt != comp_end[0] and cpt != comp_end[1]:
-                test = False
-        if i == 3:
+                return
+        elif i == 3 or i == 4:
             if cpt != comp_end[3] and cpt != comp_end[4]:
-                test = False
-        if i == 4:
-            if cpt != comp_end[3] and cpt != comp_end[4]:
-                test = False
-        if i == 2:
+                return
+        elif i == 2 or i == 5 or i == 6:
             if cpt != comp_end[i]:
-                test = False
-        if i == 5:
-            if cpt != comp_end[i]:
-                test = False
-        if i == 6:
-            if cpt != comp_end[i]:
-                test = False
+                return
     # deuxième test qui regarde si la rotation des éléments est la bonne
 
     if reverse != reverse_end:
-        test = False
+        return
     # Dernier test vérifiant si le parallélogramme doit ou non être inversé
 
     s1.update()
 
-    if test:
-        # le test est vrai, annonçons-le au joueur
-        fen3 = Toplevel()
-        fen3.title("Bravo !")
-
-        fond = Label(fen3, image=image6)
-        # Initialisation d'une fenêtre qui a un fond que l'on affiche grâce à un label
-        #  (qui est ici une image)
-        res = Button(fond, image=image7, command=lambda: [restart(),
-                                                          fen3.destroy()
-                                                          ]
-                     )
-        by = Button(fond, image=image8, command=fen.quit)
-
-        # création d'un bouton recommencer et d'un bouton quitter ( qui quitte le jeu entièrement)
-
-        fond.pack()
-        res.place(x=xres, y=yres)
-        by.place(x=xby, y=yby)
-        posx = fen3.winfo_screenwidth()
-        posy = fen3.winfo_screenheight()
-        diffx = T_fen_end
-        diffy = T_fen_end2
-        x = (posx / 2) - (diffx / 2)
-        y = (posy / 2) - (diffy / 2)
-        fen3.geometry('%dx%d+%d+%d' % (diffx, diffy, x, y))
-        # affichage et centrage de la fenêtre.
+    if not test:  # on ne peut pas arriver là normalement
+        return
+    # le test est vrai, annonçons-le au joueur
+    fin_niveau_tangram()
 
 
 def restart():
@@ -191,36 +142,13 @@ def init():
 
     Celles-ci sont dans comp et tabl"""
 
-    C_tri1.up()
-    C_tri2.up()
-    C_tripe1.up()
-    C_tripe2.up()
-    C_trimoy.up()
-    C_carre.up()
-    C_para.up()
+    for i, name in enumerate(name_pieces):
+        dict_piece[name].up()
 
-    C_tri1.shape("tri1")
-    C_tri2.shape("tri2")
-    C_tripe1.shape("tripe1")
-    C_tripe2.shape("tripe2")
-    C_trimoy.shape("trimoy")
-    C_carre.shape("carre")
-    C_para.shape("para1")
+        dict_piece[name].shape(name if name != 'para' else 'para1')
 
-    C_tri1.seth(comp[0] * 15)
-    C_tri1.goto(tabl[0])
-    C_tri2.seth(comp[1] * 15)
-    C_tri2.goto(tabl[1])
-    C_trimoy.seth(comp[2] * 15)
-    C_trimoy.goto(tabl[2])
-    C_tripe1.seth(comp[3] * 15)
-    C_tripe1.goto(tabl[3])
-    C_tripe2.seth(comp[4] * 15)
-    C_tripe2.goto(tabl[4])
-    C_carre.seth(comp[5] * 15)
-    C_carre.goto(tabl[5])
-    C_para.seth(comp[6] * 15)
-    C_para.goto(tabl[6])
+        dict_piece[name].seth(comp[i] * 15)
+        dict_piece[name].goto(tabl[i])
     color_init()
     # appel de la fonction color_init pour récupérer et afficher les couleurs des éléments
 
@@ -229,13 +157,8 @@ def color_init():
     """Met à jour la couleur des éléments du tangram
 
     (permet au joueur de personnaliser son jeu)"""
-    C_para.color(C_color7.get())
-    C_carre.color(C_color6.get())
-    C_tripe2.color(C_color5.get())
-    C_tripe1.color(C_color4.get())
-    C_trimoy.color(C_color3.get())
-    C_tri2.color(C_color2.get())
-    C_tri1.color(C_color1.get())
+    for i, name in enumerate(name_pieces):
+        dict_piece[name].color(l_color[i].get())
 
     s1.update()
 
@@ -243,15 +166,11 @@ def color_init():
 def sav_color():
     """Récupère et sauvegarde dans un fichier les couleurs choisies
     par le joueur pour son tangram"""
+    global l_color
     with open("sav_color.txt", "wb") as sauvegarde_couleur:
         sav = pickle.Pickler(sauvegarde_couleur)
-        sav.dump(C_color1.get())
-        sav.dump(C_color2.get())
-        sav.dump(C_color3.get())
-        sav.dump(C_color4.get())
-        sav.dump(C_color5.get())
-        sav.dump(C_color6.get())
-        sav.dump(C_color7.get())
+        for col in l_color:
+            sav.dump(col.get())
 
 
 def sav_res(res):
@@ -269,78 +188,25 @@ def sav_res(res):
     redem.pack()
     btn_quit.pack()
 
-    posx = advise.winfo_screenwidth()
-    posy = advise.winfo_screenheight()
-    diffx = 500
-    diffy = 50
-    x = (posx / 2) - (diffx / 2)
-    y = (posy / 2) - (diffy / 2)
-    advise.geometry('%dx%d+%d+%d' % (diffx, diffy, x, y))
+    geometry_fenetre(advise, 500, 50)
     # création et centrage d'une fenêtre demandant au joueur de redémarrer l'application
     #  pour que les changements prennent effet
 
 
-def rotation0(x, y):
-    """fonction de rotation pour C_tri1"""
-    comp[0] += 1
-    C_tri1.seth(comp[0] * 15)
-    if comp[0] == 24:
-        comp[0] = 0
-    s1.update()
+l_seuil_rotation = [24, 24, 24, 24, 24, 6, 12]
 
 
-def rotation1(x, y):
-    """fonction de rotation pour C_tri2"""
-    comp[1] += 1
-    C_tri2.seth(comp[1] * 15)
-    if comp[1] == 24:
-        comp[1] = 0
-    s1.update()
+def rotation_i(i_):
+    """Fonction de rotation pour dict_piece[name_pieces[i_]]"""
+    def aux(x, y):
+        comp[i_] += 1
+        comp[i_] %= l_seuil_rotation[i_]
+        dict_piece[name_pieces[i_]].seth(comp[i_] * 15)
+        s1.update()
+    return aux
 
 
-def rotation2(x, y):
-    """fonction de rotation pour C_trimoy"""
-    comp[2] += 1
-    C_trimoy.seth(comp[2] * 15)
-    if comp[2] == 24:
-        comp[2] = 0
-    s1.update()
-
-
-def rotation3(x, y):
-    """fonction de rotation pour C_tripe1"""
-    comp[3] += 1
-    C_tripe1.seth(comp[3] * 15)
-    if comp[3] == 24:
-        comp[3] = 0
-    s1.update()
-
-
-def rotation4(x, y):
-    """fonction de rotation pour C_tripe2"""
-    comp[4] += 1
-    C_tripe2.seth(comp[4] * 15)
-    if comp[4] == 24:
-        comp[4] = 0
-    s1.update()
-
-
-def rotation5(x, y):
-    """fonction de rotation pour C_carre"""
-    comp[5] += 1
-    C_carre.seth(comp[5] * 15)
-    if comp[5] == 6:
-        comp[5] = 0
-    s1.update()
-
-
-def rotation6(x, y):
-    """fonction de rotation pour C_para"""
-    comp[6] += 1
-    C_para.seth(comp[6] * 15)
-    if comp[6] == 12:
-        comp[6] = 0
-    s1.update()
+l_rotations = [rotation_i(i) for i in range(7)]
 
 # Les 6 fonctions rotations sont nécessaires, car on ne peut pas récupérer l'objet curseur actif
 # au moment du clic. De plus, une fonction lambda ne peut pas recevoir d'argument ce qui rend son
@@ -352,27 +218,22 @@ def reverse_para(event):
     """Récupère la forme de l'objet C_para et lui assigne sa forme symétrique"""
     global reverse
 
-    forme = C_para.shape()
+    forme = dict_piece['para'].shape()
     if forme == "para1":
         reverse = True
-        C_para.shape("para2")
+        dict_piece['para'].shape("para2")
     if forme == "para2":
         reverse = False
-        C_para.shape("para1")
+        dict_piece['para'].shape("para1")
     s1.update()
 
 
 def where(event):
-    """Cette fonction met a jour la table des positions (tabl)"""
-    tabl[0] = C_tri1.position()
-    tabl[1] = C_tri2.position()
-    tabl[2] = C_trimoy.position()
-    tabl[3] = C_tripe1.position()
-    tabl[4] = C_tripe2.position()
-    tabl[5] = C_carre.position()
-    tabl[6] = C_para.position()
+    """Cette fonction met à jour la table des positions (tabl)"""
+    for i, name in enumerate(name_pieces):
+        tabl[i] = dict_piece[name].position()
 
-    detection()
+    detection_fin()
     # lance la fonction détection pour voir si le tangram est terminé
 
 
@@ -400,7 +261,7 @@ def see():
 
     if helped >= 0:
         # si le joueur à droit à un peu d'aide, on l'aide
-        curseur = [C_tri1, C_tri2, C_trimoy, C_tripe1, C_tripe2, C_carre, C_para]
+        curseur = [dict_piece[name] for name in name_pieces]
         fond = s1.bgpic()
         # récupération du fond d'écran (permet de savoir à quel niveau on est
         cpt = len(curseur)
@@ -411,7 +272,7 @@ def see():
             curseur[j].seth(canard[1][j] * 15)
             tabl[j] = canard[0][j]
             comp[j] = canard[1][j]
-            if reverse != canard[3]\
+            if reverse != canard[3] \
                     and (curseur[j].shape() == "para1" or curseur[j].shape() == "para2"):
                 reverse_para(False)
         if fond == "HT/1000x700/lapin.gif" or fond == "HT/500x350/lapin.gif":
@@ -419,7 +280,7 @@ def see():
             curseur[j].seth(lapin[1][j] * 15)
             tabl[j] = lapin[0][j]
             comp[j] = lapin[1][j]
-            if reverse != lapin[3]\
+            if reverse != lapin[3] \
                     and (curseur[j].shape() == "para1" or curseur[j].shape() == "para2"):
                 reverse_para(False)
         if fond == "HT/1000x700/prosterne.gif" or fond == "HT/500x350/prosterne.gif":
@@ -427,7 +288,7 @@ def see():
             curseur[j].seth(prosterne[1][j] * 15)
             tabl[j] = prosterne[0][j]
             comp[j] = prosterne[1][j]
-            if reverse != prosterne[3]\
+            if reverse != prosterne[3] \
                     and (curseur[j].shape() == "para1" or curseur[j].shape() == "para2"):
                 reverse_para(False)
         if fond == "HT/1000x700/figure.gif" or fond == "HT/500x350/figure.gif":
@@ -435,27 +296,22 @@ def see():
             curseur[j].seth(figure[1][j] * 15)
             tabl[j] = figure[0][j]
             comp[j] = figure[1][j]
-            if reverse != figure[3]\
+            if reverse != figure[3] \
                     and (curseur[j].shape() == "para1" or curseur[j].shape() == "para2"):
                 reverse_para(False)
                 # pour le niveau courant, on met le curseur tiré au hasard à sa place
                 # on le tourne correctement et on met à jour la table des positions et des rotations
-                # si le curseur tiré est C_para, on regarde en plus s'il doit être retourné
+                # si le curseur tiré est dict_piece['para'],
+                # on regarde en plus s'il doit être retourné
                 # et on lance la fonction reverse_para qui se charge de mettre à jour reverse
     else:
         fen4 = Toplevel()
         attention = Label(fen4, text="Attention vous avez utilisé l'aide trop de fois ! ")
-        btnok = Button(fen4, text="OK", command=fen4.destroy)
+        btn_ok = Button(fen4, text="OK", command=fen4.destroy)
         attention.pack()
-        btnok.pack()
+        btn_ok.pack()
 
-        posx = fen4.winfo_screenwidth()
-        posy = fen4.winfo_screenheight()
-        diffx = 300
-        diffy = 50
-        x = (posx / 2) - (diffx / 2)
-        y = (posy / 2) - (diffy / 2)
-        fen4.geometry('%dx%d+%d+%d' % (diffx, diffy, x, y))
+        geometry_fenetre(fen4, 300, 50)
 
         # Si le joueur a utilisé deux fois l'aide, on lui signale à l'aide d'une fenêtre
         #  qu'il ne peut plus utiliser cette fonction pour le moment.
@@ -463,11 +319,13 @@ def see():
     s1.update()
 
 
+name_pieces = ['tri1', 'tri2', 'trimoy', 'tripe1', 'tripe2', 'carre', 'para']
+
+
 def tangram():
-    """Cette fonction est le coeur du programme elle gère le tangram même"""
+    """Cette fonction est le cœur du programme elle gère le tangram même"""
     # Init
-    global s1, C_tri1, C_tri2, C_trimoy, C_tripe1, C_tripe2, C_carre, C_para, C_color1,\
-        C_color2, C_color3, C_color4, C_color5, C_color6, C_color7, helped
+    global s1, helped, dict_piece, l_color
 
     fen2 = Toplevel()
     # Création d'une nouvelle fenêtre
@@ -475,49 +333,25 @@ def tangram():
     s1 = TurtleScreen(cv1)
     p = RawTurtle(s1)
     # Création d'un canvas Tkinter dans lequel on crée un écran turtle et un premier curseur nommé p
-
-    C_tri1 = RawTurtle(s1)
-    C_tri2 = RawTurtle(s1)
-    C_trimoy = RawTurtle(s1)
-    C_tripe1 = RawTurtle(s1)
-    C_tripe2 = RawTurtle(s1)
-    C_carre = RawTurtle(s1)
-    C_para = RawTurtle(s1)
+    dict_piece = {name: RawTurtle(s1) for name in name_pieces}
     # création des curseurs qui seront les éléments du Tangram
 
     cv1.pack()
     # affichage du canvas(et donc de l'écran turtle)
-
-    C_color1 = StringVar()
-    C_color2 = StringVar()
-    C_color3 = StringVar()
-    C_color4 = StringVar()
-    C_color5 = StringVar()
-    C_color6 = StringVar()
-    C_color7 = StringVar()
+    l_color = []
+    for i in range(7):
+        l_color.append(StringVar())
     # création des objets qui contiendront les couleurs des curseurs,
     # On utilise ici des objets pour permettre la mise à jour simple des couleurs
     # grâce à des radiobutton
 
     with open("sav_color.txt", "rb") as sauvegarde_couleur:
         color_val = pickle.Unpickler(sauvegarde_couleur)
-        colorset[0] = color_val.load()
-        colorset[1] = color_val.load()
-        colorset[2] = color_val.load()
-        colorset[3] = color_val.load()
-        colorset[4] = color_val.load()
-        colorset[5] = color_val.load()
-        colorset[6] = color_val.load()
-    # lecture des couleurs sauvegardées par le joueur dans le fichier sav_color.txt
-
-    C_color1.set(colorset[0])
-    C_color2.set(colorset[1])
-    C_color3.set(colorset[2])
-    C_color4.set(colorset[3])
-    C_color5.set(colorset[4])
-    C_color6.set(colorset[5])
-    C_color7.set(colorset[6])
-    # assignation des chaînes contenant le nom des couleurs aux objets créés plus tôt
+        for i in range(7):
+            # lecture des couleurs sauvegardées par le joueur dans le fichier sav_color.txt
+            color_set[i] = color_val.load()
+            # assignation des chaînes contenant le nom des couleurs aux objets créés plus tôt
+            l_color[i].set(color_set[i])
 
     # Nous allons à présent créer le menu qui est situé en haut de la fenêtre de jeu
     menu1 = Menu(fen2)
@@ -531,22 +365,18 @@ def tangram():
     fichier.add_cascade(label="Options", menu=options)
     color = Menu(options, tearoff=1)
     options.add_cascade(label="Couleur", menu=color)
-    triangle1 = Menu(options, tearoff=0)
-    triangle2 = Menu(options, tearoff=0)
-    trianglemoy = Menu(options, tearoff=0)
-    trianglepe1 = Menu(options, tearoff=0)
-    trianglepe2 = Menu(options, tearoff=0)
-    carree = Menu(options, tearoff=0)
-    paral = Menu(options, tearoff=0)
+    list_menus = [Menu(options, tearoff=0) for _ in range(7)]
     # ici nous allons définir un menu pour chaque élément du tangram qui permetra au joueur
     # de personnaliser les couleurs de son jeu qui sont automatiquement mises à jour
     # grâce à la fonction color_init()
 
-    liste_init = [["Triangle 1", triangle1, C_color1], ["Triangle 2", triangle2, C_color2],
-                  ["Triangle Moyen", trianglemoy, C_color3],
-                  ["Petit Triangle 1", trianglepe1, C_color4],
-                  ["Petit Triangle 2", trianglepe2, C_color5], ["Carre", carree, C_color6],
-                  ["Parallélogramme", paral, C_color7]]
+    liste_init = [["Triangle 1", list_menus[0], l_color[0]],
+                  ["Triangle 2", list_menus[1], l_color[1]],
+                  ["Triangle Moyen", list_menus[2], l_color[2]],
+                  ["Petit Triangle 1", list_menus[3], l_color[3]],
+                  ["Petit Triangle 2", list_menus[4], l_color[4]],
+                  ["Carre", list_menus[5], l_color[5]],
+                  ["Parallélogramme", list_menus[6], l_color[6]]]
     liste_init_color = [["Rouge", "red"], ["Bleu", "blue"], ["Vert", "green"], ["Jaune", "yellow"],
                         ["Rose", "pink"], ["Violet", "purple"], ["Noir", "black"],
                         ["Blanc", "white"], ["Orange", "orange"], ["Bleu Ciel", "skyblue"],
@@ -558,14 +388,13 @@ def tangram():
             i[1].add_radiobutton(label=j[0], value=j[1], variable=i[2], command=color_init)
 
     color.add_separator()
-    color.add_command(label="Défaut", command=lambda: [C_color1.set(color_default[0]),
-                                                       C_color2.set(color_default[1]),
-                                                       C_color3.set(color_default[2]),
-                                                       C_color4.set(color_default[3]),
-                                                       C_color5.set(color_default[4]),
-                                                       C_color6.set(color_default[5]),
-                                                       C_color7.set(color_default[6]),
-                                                       color_init()])
+
+    def apply_color_default():
+        for i in range(7):
+            l_color[i].set(color_default[i])
+        color_init()
+
+    color.add_command(label="Défaut", command=apply_color_default)
     # permet au joueur de remettre les couleurs par défaut du jeu
     color.add_separator()
     color.add_command(label="Sauvegarder", command=sav_color)
@@ -593,7 +422,7 @@ def tangram():
     aide.add_command(label="Coups de pouce : 2 par partie", command=see)
     # lance la fonction see pour placer un des éléments du Tangram
     aide.add_command(label="Comment Jouer ?", command=lambda: os.system("gedit comment_jouer.txt"))
-    # affiche dans gedit le fichier commen_jouer.txt
+    # affiche dans gedit le fichier comment_jouer.txt
 
     bonus = Menu(menu1, tearoff=0)
     menu1.add_cascade(label="Bonus", menu=bonus)
@@ -605,13 +434,7 @@ def tangram():
     fen2.config(menu=menu1)
     # affectation du menu à notre fenêtre de jeu
 
-    posx = fen2.winfo_screenwidth()
-    posy = fen2.winfo_screenheight()
-    diffx = T_fen
-    diffy = T_fen2
-    x = (posx / 2) - (diffx / 2)
-    y = (posy / 2) - (diffy / 2)
-    fen2.geometry('%dx%d+%d+%d' % (diffx, diffy, x, y))
+    geometry_fenetre(fen2, T_fen, T_fen2)
     # centrage de la fenêtre de jeu
 
     p._tracer(8, 25)
@@ -739,21 +562,10 @@ def tangram():
     # et que le joueur puisse commencer la partie
     restart()
 
-    C_tri1.onclick(rotation0, btn=3)
-    C_tri2.onclick(rotation1, btn=3)
-    C_trimoy.onclick(rotation2, btn=3)
-    C_tripe1.onclick(rotation3, btn=3)
-    C_tripe2.onclick(rotation4, btn=3)
-    C_carre.onclick(rotation5, btn=3)
-    C_para.onclick(rotation6, btn=3)
+    for i, name in enumerate(name_pieces):
+        dict_piece[name].onclick(l_rotations[i], btn=3)
 
-    C_tri1.ondrag(C_tri1.goto)
-    C_tri2.ondrag(C_tri2.goto)
-    C_tripe1.ondrag(C_tripe1.goto)
-    C_tripe2.ondrag(C_tripe2.goto)
-    C_trimoy.ondrag(C_trimoy.goto)
-    C_carre.ondrag(C_carre.goto)
-    C_para.ondrag(C_para.goto)
+        dict_piece[name].ondrag(dict_piece[name].goto)
     # initialisation des bindings pour que le joueur puisse faire tourner l'élément et le déplacer
 
     cv1.bind("<ButtonRelease-1>", where)
@@ -768,9 +580,7 @@ def tangram():
 # Création des premières variables : les couleurs, les couleurs par défaut
 # et le nombre d'aides disponibles
 
-colorset = ["brown", "purple", "pink", "yellow", "blue", "red", "green"]
-
-color_default = ["brown", "purple", "pink", "yellow", "blue", "red", "green"]
+color_set = color_default = ["brown", "purple", "pink", "yellow", "blue", "red", "green"]
 
 helped = 2
 
@@ -781,28 +591,30 @@ fen.title("Tangram Project")
 
 # Initialisation de la résolution
 
-with open("sav_res.txt", "rb") as sauvegarde_resolution:
-    res_val = pickle.Unpickler(sauvegarde_resolution)
+with open("sav_res.txt", "rb") as saved_resolution:
+    res_val = pickle.Unpickler(saved_resolution)
     res = res_val.load()
-# lecture dans sav_res.txt de la résolution du programme ( par défaut 1000x700 )
+# lecture dans sav_res.txt de la résolution du programme (par défaut 1000x700)
+
+
+image1 = PhotoImage(file=f"HT/{res}/Tangram.gif")
+image2 = PhotoImage(file=f"HT/{res}/main.gif")
+image3 = PhotoImage(file=f"HT/{res}/Jouer.gif")
+image4 = PhotoImage(file=f"HT/{res}/Crédits.gif")
+image5 = PhotoImage(file=f"HT/{res}/Quitter.gif")
+image6 = PhotoImage(file=f"HT/{res}/end.gif")
+image7 = PhotoImage(file=f"HT/{res}/reco.gif")
+image8 = PhotoImage(file=f"HT/{res}/quitter_end.gif")
 
 if res == "1000x700":
-    image1 = PhotoImage(file="HT/1000x700/Tangram.gif")
-    image2 = PhotoImage(file="HT/1000x700/main.gif")
-    image3 = PhotoImage(file="HT/1000x700/Jouer.gif")
-    image4 = PhotoImage(file="HT/1000x700/Crédits.gif")
-    image5 = PhotoImage(file="HT/1000x700/Quitter.gif")
-    image6 = PhotoImage(file="HT/1000x700/end.gif")
-    image7 = PhotoImage(file="HT/1000x700/reco.gif")
-    image8 = PhotoImage(file="HT/1000x700/quitter_end.gif")
-    # importation des images qui dépendent de la résolution (le fond des fenètres)
+    # importation des images qui dépendent de la résolution (le fond des fenêtres)
     T_fen = 1000
     T_fen2 = 700
     T_fen_end = 300
     T_fen_end2 = 210
     # configuration de la taille des fenêtres principales et de la fenêtre de fin de jeu
     cote = 200
-    # taille du coté principal des éléments du tangram
+    # taille du côté principal des éléments du tangram
     xbtn = 410
     ybtn = 252
     xbtn1 = 400
@@ -820,31 +632,25 @@ if res == "1000x700":
     canard = [
         [(-161.00, -21.00), (-160.00, -21.00), (-262.00, -91.00), (-384.00, 10.00), (-60.00, 30.00),
          (-334.00, 61.00), (-309.00, -25.00)], [0, 12, 15, 12, 6, 3, 6], False,
-        "HT/1000x700/canard.gif"]
+        f"HT/{res}/canard.gif"]
     prosterne = [
         [(-230.00, 26.00), (-154.00, 18.00), (-292.00, -21.00), (-304.00, 28.00), (-86.00, -107.00),
          (-39.00, -25.00), (-319.00, -55.00)], [16, 13, 13, 19, 16, 2, 1], False,
-        "HT/1000x700/prosterne.gif"]
-    lapin = [[(-281.00, -115.00), (-251.00, -44.00), (-253.00, 128.00), (-200.00, -81.00), (-250.00, -30.00),
+        f"HT/{res}/prosterne.gif"]
+    lapin = [[(-281.00, -115.00), (-251.00, -44.00), (-253.00, 128.00), (-200.00, -81.00),
+              (-250.00, -30.00),
               (-216.00, 59.00), (-198.00, 137.00)], [3, 0, 21, 0, 12, 0, 4], False,
-             "HT/1000x700/lapin.gif"]
+             f"HT/{res}/lapin.gif"]
     figure = [
-        [(-223.00, 16.00), (-240.00, -111.00), (-228.00, 138.00), (-285.00, 26.00), (-322.00, 33.00), (-219.00, -39.00),
+        [(-223.00, 16.00), (-240.00, -111.00), (-228.00, 138.00), (-285.00, 26.00),
+         (-322.00, 33.00), (-219.00, -39.00),
          (-184.00, 131.00)], [15, 9, 0, 12, 9, 3, 9], True, "HT/1000x700/figure.gif"]
     # tableaux contenant toutes les informations pour la réalisation des niveaux
     # ( 1 : emplacement, 2 : rotation, 3 : valeur de reverse,
     #  4 : emplacement de l'image de fond associée)
 
-else:
-    image1 = PhotoImage(file="HT/500x350/Tangram.gif")
-    image2 = PhotoImage(file="HT/500x350/main.gif")
-    image3 = PhotoImage(file="HT/500x350/Jouer.gif")
-    image4 = PhotoImage(file="HT/500x350/Crédits.gif")
-    image5 = PhotoImage(file="HT/500x350/Quitter.gif")
-    image6 = PhotoImage(file="HT/500x350/end.gif")
-    image7 = PhotoImage(file="HT/500x350/reco.gif")
-    image8 = PhotoImage(file="HT/500x350/quitter_end.gif")
-    # importation des images qui dépendent des de la résolution (le fond des fenêtres)
+elif res == "500x350":
+    # import des images qui dépendent de la résolution (le fond des fenêtres)
     T_fen = 500
     T_fen2 = 350
     T_fen_end = 150
@@ -869,39 +675,34 @@ else:
              [0, 18, 18, 6, 12, 3, 6], False]
     canard = [[(-80.5, -10.5), (-80.0, -10.5), (-131.0, -45.5), (-192.0, 5.0), (-30.0, 15.0),
                (-167.0, 30.5), (-154.5, -12.5)],
-              [0, 12, 15, 12, 6, 3, 6], False, "HT/500x350/canard.gif"]
+              [0, 12, 15, 12, 6, 3, 6], False, f"HT/{res}/canard.gif"]
     prosterne = [[(-115.0, 13.0), (-77.0, 9.0), (-146.0, -10.5), (-152.0, 14.0), (-43.0, -53.5),
                   (-19.5, -12.5), (-159.5, -27.5)],
-                 [16, 13, 13, 19, 16, 2, 1], False, "HT/500x350/prosterne.gif"]
+                 [16, 13, 13, 19, 16, 2, 1], False, f"HT/{res}/prosterne.gif"]
     lapin = [[(-140.5, -57.5), (-125.5, -22.0), (-126.5, 64.0), (-100.0, -40.5), (-125.0, -15.0),
               (-108.0, 29.5), (-99.0, 68.5)],
-             [3, 0, 21, 0, 12, 0, 4], False, "HT/500x350/lapin.gif"]
+             [3, 0, 21, 0, 12, 0, 4], False, f"HT/{res}/lapin.gif"]
     figure = [[(-111.5, 8.0), (-120.0, -55.5), (-114.0, 69.0), (-142.5, 13.0), (-161.0, 16.5),
                (-109.5, -19.5), (-92.0, 65.5)],
-              [15, 9, 0, 12, 9, 3, 9], True, "HT/500x350/figure.gif"]
+              [15, 9, 0, 12, 9, 3, 9], True, f"HT/{res}/figure.gif"]
     # tableaux contenant toutes les informations pour la réalisation des niveaux
     # ( 1 : emplacement,2 : rotation, 3: value de reverse,
     # 4 : emplacement de l'image de fond associée)
-
+else:
+    raise ValueError("Seules les résolutions 1000x700 ou 500x350 sont prévues.")
 
 # Fin de l'initialisation de la fenêtre
 
 lab0 = Label(fen, image=image1)
-# Ce label contient l'image de fond ( la première de l'animation)
+# Ce label contient l'image de fond (la première de l'animation)
 btn = Button(lab0, text="Jouer", command=tangram, image=image3)
 btn1 = Button(lab0, text="Crédits", command=lambda: os.system("gedit Crédits.txt"), image=image4)
 btn2 = Button(lab0, text="Quitter", command=fen.quit, image=image5)
 # Création de 3 boutons permettant de jouer au tangram,
 # de quitter le jeu ou d'afficher dans gedit le fichier crédits.txt
 
-posx = fen.winfo_screenwidth()
-posy = fen.winfo_screenheight()
 # récupération de la position de la fenêtre (ne marche que sous linux)
-diffx = T_fen
-diffy = T_fen2
-x = (posx / 2) - (diffx / 2)
-y = (posy / 2) - (diffy / 2)
-fen.geometry('%dx%d+%d+%d' % (diffx, diffy, x, y))
+geometry_fenetre(fen, T_fen, T_fen2)
 # centrage de la fenêtre
 
 lab0.pack(side='top', fill='both', expand=1)
