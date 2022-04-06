@@ -1,23 +1,24 @@
+""" Game of 2048 ... """
+
 from random import randint
 from tkinter import *
 import numpy as np
 
-""" Game of 2048 ... """
 
 ###########################################
-#  Jeu de 2048                            #
+#                                         #
+#              Jeu de 2048                #
 #                                         #
 #                                         #
 #                                         #
 #                                         #
 #                                         #
-#                                         #
-#  Version du 29/02/2016 - Licence : No   #
+#  Version du 29/02/2016 - License : Non  #
 ###########################################
 
 
 class MatrixJeu:
-    """Class with the numeric grid and add_number,refresh,turn_tableau, mvt_gauche. """
+    """Class with the numeric grid and add_number, refresh, turn_tableau, mvt_gauche. """
 
     def __init__(self):
         """
@@ -37,26 +38,26 @@ class MatrixJeu:
         self.zeros = np.argwhere(self.matrix == np.zeros((4, 4), dtype=int))
         self.nb_zeros = np.size(self.zeros, 0)
 
+    @staticmethod
+    def number_random():
+        """
+        random int
+        :return: 2 or 4, with a probability of one 4 for twenty 2
+        """
+        if randint(1, 11) == 1:
+            return 4
+        return 2  # return by chance one 2 or 4 with a probability of one 4 for twenty 2
+
     def add_number(self):
         """
-        self = MatrixJeu object
-        add 2 or 4, by chance, to the numeric grid ( here it's to self.matrix )
+        add 2 or 4, at random, to the numeric grid ( here it's to self.matrix )
         :rtype : None
         """
-
-        def number_random():
-            """
-            random int
-            :return: 2 or 4, with a probability of one 4 for twenty 2
-            """
-            if randint(1, 11) == 1:
-                return 4
-            return 2  # return by chance one 2 or 4 with a probability of one 4 for twenty 2
 
         if self.nb_zeros != 0:
             n = randint(0, self.nb_zeros - 1)
             [i, j] = self.zeros[n]
-            nb = number_random()
+            nb = self.number_random()
             if nb == 2:
                 self.matrix[i][j] = 2
                 self.power[i][j] = 1
@@ -67,7 +68,9 @@ class MatrixJeu:
 
     def turn_tableau(self, orientation):
         """
-        turn the grid according to orientation in the purpose of having just one movement ( right to left ) to be coded
+        Turn the grid according to orientation.
+
+        With this method, only one movement ( right to left ) needs to be coded
         :param orientation:
         """
         if orientation == "Right":
@@ -85,7 +88,9 @@ class MatrixJeu:
             self.power = self.power.T
 
     def decal_gauche(self):
-        """Before movement in itself : transform [2,3,0,4] in [2,3,4,0] (easier to manipulate for the movement)"""
+        """Before movement in itself : transform [2,3,0,4] in [2,3,4,0]
+
+        (easier to manipulate for the movement)"""
         for i in range(4):
             m = []
             power = []
@@ -164,7 +169,8 @@ class Panel(Frame):
         self.n_lig, self.n_col = 4, 4  # initial grid = 4 x 4
 
         # Canvas :
-        self.can = Canvas(self, bg="white", borderwidth=0, highlightthickness=1, highlightbackground="black")
+        self.can = Canvas(self, bg="white", borderwidth=0, highlightthickness=1,
+                          highlightbackground="black")
         # self.can.bind("<Configure>", self.re_scale)
         self.can.pack()
 
@@ -186,7 +192,7 @@ class Panel(Frame):
 
     def verify(self):
         """
-        this function verifies if movements are possible.
+        This function verifies if movements are possible.
         if yes, put the list of the possible movement in self.directions_possibles
         else put False in self.verified => the gamer have lost.
         """
@@ -230,7 +236,7 @@ class Panel(Frame):
                 self.trace_grille()
                 message = self.can.create_text(2*self.cote, 2*self.cote, text="",
                                                font="Helvetica 30 bold", fill='Black')
-                for i in range(5):
+                for _ in range(5):
                     self.can.itemconfig(message, text="You've lost!!")
                     self.can.update()
                     self.can.after(500)
@@ -245,7 +251,7 @@ class Panel(Frame):
         else:
             message = self.can.create_text(2*self.cote, 2*self.cote, text="",
                                            font="Helvetica 30 bold", fill='Black')
-            for i in range(5):
+            for _ in range(5):
                 self.can.itemconfig(message, text="You've lost!!")
                 self.can.update()
                 self.can.after(500)
@@ -283,10 +289,13 @@ class Panel(Frame):
         for i in range(4):
             for j in range(4):
                 color = self.matrix.power[i][j]
-                self.can.create_rectangle(j * c, i * c, (j+1) * c, (i + 1) * c, outline="grey", width=1,
-                                          fill="#" + hex(255 - 15 * color)[2:] +
-                                               hex(255 - color * (36 - 2 * color))[2:] + hex(250 - color)[2:])
-                # self.can.create_rectangle(j * c, i * c, (j+1) * c, (i + 1) * c, outline="grey", width=0,
+                self.can.create_rectangle(j * c, i * c, (j+1) * c, (i + 1) * c,
+                                          outline="grey", width=1,
+                                          fill="#" + hex(255 - 15 * color)[2:]
+                                               + hex(255 - color * (36 - 2 * color))[2:]
+                                               + hex(250 - color)[2:])
+                # self.can.create_rectangle(j * c, i * c, (j+1) * c, (i + 1) * c,
+                #                           outline="grey", width=0,
                 #                           fill="#" + hex(255 - 15 * color)[2:] + "fff")
 
         # Layout of all the numbers :
@@ -295,7 +304,8 @@ class Panel(Frame):
                 x = int((c + 1 / 2) * self.cote)
                 y = int((l + 1 / 2) * self.cote)
                 # self.can.create_rectangle()
-                self.can.create_text(x, y, text=str(self.matrix.matrix[l][c]), font="Helvetica 30 normal", fill="black")
+                self.can.create_text(x, y, text=str(self.matrix.matrix[l][c]),
+                                     font="Helvetica 30 normal", fill="black")
 
     def movement(self, event):
         """the manager of the event <Key> """
@@ -310,7 +320,7 @@ class JeuFinal(Frame):
     def __init__(self):
         Frame.__init__(self)
         self.master.geometry("500x400")
-        self.master.title(" Jeu de 2048")
+        self.master.title("Jeu de 2048")
 
         self.m_bar = MenuBar(self)
         self.m_bar.pack(side=TOP, expand=NO, fill=X)
@@ -346,7 +356,7 @@ class JeuFinal(Frame):
         msg = Toplevel(self)
         Message(msg, width=200, aspect=100, justify=CENTER,
                 text="2048 \n \n coding by Max. Duv. , February 2016.\n"
-                     "Licence = no idea !").pack(padx=10, pady=10)
+                     "Licence = none").pack(padx=10, pady=10)
 
 
 if __name__ == '__main__':
