@@ -1,14 +1,14 @@
 #! /usr/bin/python
 # -*- coding: utf-8 -*-
-# #########Allumettes###########
+# ######### Allumettes ###########
 
 from turtle import *
 from tkinter import *
 
 
-# Fonction qui permet d'autoriser l'effaçage d'une allumette en fonction de plusieurs choses, tout d'abord bien sur si
-# le joueur clique sur une allumette, et ensuite si il n'a pas déjà effacé pendant son tour une allumette
-# d'un autre étage.
+# Fonction qui permet d'autoriser l'effaçage d'une allumette en fonction de plusieurs choses,
+# tout d'abord bien sur si le joueur clique sur une allumette, et ensuite s'il n'a pas déjà
+# effacé pendant son tour une allumette d'un autre étage.
 
 def efface(x, y):
     a = [x, y]
@@ -17,7 +17,7 @@ def efface(x, y):
     for index, value in enumerate(list_matchstick):
         z = value.pos()
         if (abs(a[0] - z[0]) < 10 and abs(a[1] - z[1]) < 25) and (
-                        line_select.get() == -1 or z[1] == line_select.get()):
+                line_select.get() == -1 or z[1] == line_select.get()):
             value.ht()
             state -= 1
             win()
@@ -25,13 +25,14 @@ def efface(x, y):
                 line_select.set(z[1])
 
 
-# La variable état représente le nombre d'allumettes restantes en jeux, quand elle est a 0, l'avant dernier joueur est
-# le gagnant.
+# La variable état représente le nombre d'allumettes restantes en jeu, quand elle est à 0,
+# l'avant-dernier joueur est le gagnant.
 
 def win():
     if state == 0:
         window_toto2 = Toplevel(window_toto)
-        announce = Label(window_toto2, text="Congratulations Player %d, you've won !!!" % state_player.get())
+        announce = Label(window_toto2, text=f"Congratulations Player {state_player.get()}, "
+                                            f"you've won !!!")
         announce.pack()
         ok_btn = Button(window_toto2, text="OK", command=window_toto2.destroy)
         ok_btn.pack()
@@ -45,7 +46,7 @@ def win():
         window_toto2.geometry('%dx%d+%d+%d' % (diff_x, diff_y, x, y))
 
 
-# Fonction qui ré-initialise les variable afin de pouvoir faire une nouvelle partie
+# Fonction qui réinitialise les variables afin de pouvoir faire une nouvelle partie
 def new_part():
     global state, state_player, line_select, list_matchstick
     state = 16
@@ -55,7 +56,7 @@ def new_part():
         match.st()
 
 
-# Création d'une fenêtre TK pour pouvoir y placer les radioboutton, ainsi que le bouton recommencer
+# Création d'une fenêtre TK pour pouvoir y placer les boutons radio, ainsi que le bouton recommencer
 
 window_toto = Tk()
 window_toto.title("Matchstick")
@@ -76,27 +77,9 @@ state_player = IntVar()
 line_select = IntVar()
 
 # Création des 16 curseurs qui auront l'image d'une allumette
-
-a1 = RawTurtle(screen1)
-a2 = RawTurtle(screen1)
-a3 = RawTurtle(screen1)
-a4 = RawTurtle(screen1)
-a5 = RawTurtle(screen1)
-a6 = RawTurtle(screen1)
-a7 = RawTurtle(screen1)
-a8 = RawTurtle(screen1)
-a9 = RawTurtle(screen1)
-a10 = RawTurtle(screen1)
-a11 = RawTurtle(screen1)
-a12 = RawTurtle(screen1)
-a13 = RawTurtle(screen1)
-a14 = RawTurtle(screen1)
-a15 = RawTurtle(screen1)
-a16 = RawTurtle(screen1)
-
-# On les place dans une liste afin de faciliter leur gestions (leur assigner l'image de l'allumette, les placer au bon
-# endroit etc
-list_matchstick = [a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16]
+# On les place dans une liste afin de faciliter leur gestion (leur assigner l'image de l'allumette,
+# les placer au bon endroit etc
+list_matchstick = [RawTurtle(screen1) for _ in range(16)]
 
 screen1.register_shape("Allumettes/allumettes.gif")
 screen1.bgpic("Allumettes/alu2.gif")
@@ -104,9 +87,9 @@ screen1.bgpic("Allumettes/alu2.gif")
 for i in list_matchstick:
     i.shape("Allumettes/allumettes.gif")
 
-# Cette liste contient les positions de chaque allumette, afin qu'elles représente un triangle
-triangle_toto = [[0, 210], [-30, 140], [0, 140], [30, 140], [-60, 70], [-30, 70], [0, 70], [30, 70], [60, 70], [-90, 0],
-                 [-60, 0], [-30, 0], [0, 0], [30, 0], [60, 0], [90, 0]]
+# Cette liste contient les positions de chaque allumette, afin qu'elles représentent un triangle
+triangle_toto = [[0, 210], [-30, 140], [0, 140], [30, 140], [-60, 70], [-30, 70], [0, 70], [30, 70],
+                 [60, 70], [-90, 0], [-60, 0], [-30, 0], [0, 0], [30, 0], [60, 0], [90, 0]]
 
 # On place les allumettes correctement
 for index, value in enumerate(triangle_toto):
@@ -119,9 +102,11 @@ new_part()
 for i in list_matchstick:
     i.onclick(efface, btn=1)
 
-# Création des 2 radiobuttons pour changer de joueur et du bouton recommencer
-player_1 = Radiobutton(text="Joueur 1", variable=state_player, value=2, command=lambda: [line_select.set(-1)])
-player_2 = Radiobutton(text="Joueur 2", variable=state_player, value=1, command=lambda: [line_select.set(-1)])
+# Création des 2 boutons radio pour changer de joueur et du bouton recommencer
+player_1 = Radiobutton(text="Joueur 1", variable=state_player, value=2,
+                       command=lambda: [line_select.set(-1)])
+player_2 = Radiobutton(text="Joueur 2", variable=state_player, value=1,
+                       command=lambda: [line_select.set(-1)])
 reco = Button(text="Nouvelle Partie", command=new_part)
 
 # On les place correctement
