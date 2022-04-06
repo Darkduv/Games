@@ -17,6 +17,7 @@ def distance(p1, p2):
 
 
 def geometry_fenetre(_fen: Tk | Toplevel, _diff_x, _diff_y):
+    """Set geometry of the window _fen"""
     _pos_x, _pos_y = _fen.winfo_screenwidth(), _fen.winfo_screenheight()
     _x = int((_pos_x / 2) - (_diff_x / 2))
     _y = int((_pos_y / 2) - (_diff_y / 2))
@@ -86,7 +87,7 @@ def detection_fin():
                 # Ces 4 premiers tests sont plus complexes, car on ne sait pas quel triangle
                 #  le joueur va choisir (2 emplacements pour chaque triangle).
 
-        if i == 2 or i == 5 or i == 6:
+        if i in [2, 5, 6]:
             if distance(tabl[i], pt) <= 5:
                 dict_piece[name_pieces[i]].goto(pt)
             else:
@@ -98,12 +99,12 @@ def detection_fin():
 
     for i, cpt in enumerate(comp):
         if i == 0 or i == 1:
-            if cpt != comp_end[0] and cpt != comp_end[1]:
+            if cpt not in [comp_end[0], comp_end[1]]:
                 return
         elif i == 3 or i == 4:
-            if cpt != comp_end[3] and cpt != comp_end[4]:
+            if cpt not in [comp_end[3], comp_end[4]]:
                 return
-        elif i == 2 or i == 5 or i == 6:
+        elif i in [2, 5, 6]:
             if cpt != comp_end[i]:
                 return
     # deuxième test qui regarde si la rotation des éléments est la bonne
