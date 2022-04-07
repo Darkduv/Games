@@ -367,7 +367,7 @@ def tangram():
     color = Menu(options, tearoff=1)
     options.add_cascade(label="Couleur", menu=color)
     list_menus = [Menu(options, tearoff=0) for _ in range(7)]
-    # ici nous allons définir un menu pour chaque élément du tangram qui permetra au joueur
+    # ici nous allons définir un menu pour chaque élément du tangram qui permettra au joueur
     # de personnaliser les couleurs de son jeu qui sont automatiquement mises à jour
     # grâce à la fonction color_init()
 
@@ -399,7 +399,7 @@ def tangram():
     # permet au joueur de remettre les couleurs par défaut du jeu
     color.add_separator()
     color.add_command(label="Sauvegarder", command=sav_color)
-    # sauvegarde la configuration des couleurs grâce a la fonction
+    # sauvegarde la configuration des couleurs grâce à la fonction
     resolution = Menu(options, tearoff=0)
     options.add_cascade(label="Résolution", menu=resolution)
     resolution.add_command(label="1000x700", command=lambda: sav_res("1000x700"))
@@ -447,54 +447,50 @@ def tangram():
     p.ht()
     p.up()
 
-    p.begin_poly()
-    p.fd(cote / 4)
-    p.right(135)
-    p.fd((cote * sqrt(2)) / 4)
-    p.right(90)
-    p.fd((cote * sqrt(2)) / 4)
-    p.seth(0)
-    p.fd(cote / 4)
-    p.end_poly()
-    tripe1 = p.get_poly()
-    s1.register_shape("tripe1", tripe1)
-    s1.register_shape("tripe2", tripe1)
+    def register_shape_init(dessine_forme, l_name_shape, tortue=p, turtle_screen=s1):
+        """Enregistre le polygone formé par dessine_forme"""
 
-    p.begin_poly()
-    p.fd(cote / 2)
-    p.right(135)
-    p.fd((cote * sqrt(2)) / 2)
-    p.right(90)
-    p.fd((cote * sqrt(2)) / 2)
-    p.seth(0)
-    p.fd(cote / 2)
-    p.end_poly()
-    tri1 = p.get_poly()
-    s1.register_shape("tri1", tri1)
-    s1.register_shape("tri2", tri1)
+        tortue.begin_poly()
+        dessine_forme(tortue)
+        shape_ = tortue.get_poly()
+        for name in l_name_shape:
+            turtle_screen.register_shape(name, shape_)
 
-    p.begin_poly()
-    p.left(90)
-    p.fd(sqrt((cote / 2) ** 2 + (cote / 2) ** 2) / 4)
-    p.right(90)
-    p.fd(cote / 8)
-    p.right(90)
-    p.fd(cote / 4)
-    p.seth(225)
-    p.fd(sqrt((cote / 2) ** 2 + (cote / 2) ** 2) / 2)
-    p.seth(90)
-    p.fd(cote / 2)
-    p.seth(45)
-    p.fd(sqrt((cote / 2) ** 2 + (cote / 2) ** 2) / 2)
-    p.seth(270)
-    p.fd(cote / 4)
-    p.right(90)
-    p.fd(cote / 8)
-    p.goto(0, 0)
-    p.seth(0)
-    p.end_poly()
-    para1 = p.get_poly()
-    s1.register_shape("para1", para1)
+    def tri_pe(demi_hyp):
+        def aux(tortue):
+            tortue.fd(demi_hyp)
+            tortue.right(135)
+            tortue.fd(demi_hyp * sqrt(2))
+            tortue.right(90)
+            tortue.fd(demi_hyp * sqrt(2))
+            tortue.seth(0)
+            tortue.fd(demi_hyp)
+            tortue.end_poly()
+        return aux
+
+    register_shape_init(tri_pe(cote / 4), ['tripe1', 'tripe2'])
+    register_shape_init(tri_pe(cote / 2), ['tri1', 'tri2'])
+
+    def parallelo(tortue):
+        p.left(90)
+        p.fd(sqrt((cote / 2) ** 2 + (cote / 2) ** 2) / 4)
+        p.right(90)
+        p.fd(cote / 8)
+        p.right(90)
+        p.fd(cote / 4)
+        p.seth(225)
+        p.fd(sqrt((cote / 2) ** 2 + (cote / 2) ** 2) / 2)
+        p.seth(90)
+        p.fd(cote / 2)
+        p.seth(45)
+        p.fd(sqrt((cote / 2) ** 2 + (cote / 2) ** 2) / 2)
+        p.seth(270)
+        p.fd(cote / 4)
+        p.right(90)
+        p.fd(cote / 8)
+        p.goto(0, 0)
+        p.seth(0)
+    register_shape_init(parallelo, ['para1'])
 
     p.begin_poly()
     p.right(90)
@@ -519,25 +515,18 @@ def tangram():
     para2 = p.get_poly()
     s1.register_shape("para2", para2)
 
-    p.begin_poly()
-    p.left(90)
-    p.fd(sqrt((cote / 2) ** 2 + (cote / 2) ** 2) / 4)
-    p.right(90)
-    p.fd(sqrt((cote / 2) ** 2 + (cote / 2) ** 2) / 4)
-    p.right(90)
-    p.fd(sqrt((cote / 2) ** 2 + (cote / 2) ** 2) / 2)
-    p.right(90)
-    p.fd(sqrt((cote / 2) ** 2 + (cote / 2) ** 2) / 2)
-    p.right(90)
-    p.fd(sqrt((cote / 2) ** 2 + (cote / 2) ** 2) / 2)
-    p.right(90)
-    p.fd(sqrt((cote / 2) ** 2 + (cote / 2) ** 2) / 4)
-    p.right(90)
-    p.fd(sqrt((cote / 2) ** 2 + (cote / 2) ** 2) / 4)
-    p.seth(0)
-    p.end_poly()
-    carre = p.get_poly()
-    s1.register_shape("carre", carre)
+    def carre_(tortue):
+        demi_size = sqrt((cote / 2) ** 2 + (cote / 2) ** 2) / 4
+        tortue.left(90)
+
+        for trace in range(6):
+            tortue.fd(demi_size if trace in [0, 1, 5] else demi_size*2)
+            tortue.right(90)
+
+        tortue.fd(demi_size)
+        tortue.seth(0)
+
+    register_shape_init(carre_, ['carre'])
 
     p.begin_poly()
     p.left(45)
