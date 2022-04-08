@@ -25,25 +25,20 @@ def geometry_fenetre(_fen: Tk | Toplevel, _diff_x, _diff_y):
 
 
 def fin_niveau_tangram():
-    fen3 = Toplevel()
+    fen3 = Toplevel()  # Initialisation d'une fenêtre
+    # qui a un fond que l'on affiche grâce à un label
     fen3.title("Bravo !")
-
-    fond = Label(fen3, image=image6)
-    # Initialisation d'une fenêtre qui a un fond que l'on affiche grâce à un label
-    #  (qui est ici une image)
-    res = Button(fond, image=image7, command=lambda: [restart(),
-                                                      fen3.destroy()
-                                                      ]
-                 )
-    by = Button(fond, image=image8, command=fen.quit)
+    fond = Label(fen3, image=image6)  # le fond est ici une image
 
     # création d'un bouton recommencer et d'un bouton quitter (qui quitte le jeu entièrement)
+    res = Button(fond, image=image7, command=lambda: [restart(), fen3.destroy()])
+    by = Button(fond, image=image8, command=fen.quit)
 
     fond.pack()
-    res.place(x=xres, y=yres)
-    by.place(x=xby, y=yby)
-    geometry_fenetre(fen3, T_fen_end, T_fen_end2)
     # affichage et centrage de la fenêtre.
+    res.place(x=config_res[res]["xres"], y=config_res[res]["yres"])
+    by.place(x=config_res[res]["xby"], y=config_res[res]["yby"])
+    geometry_fenetre(fen3, config_res[res]["T_fen_end"], config_res[res]["T_fen_end2"])
 
 
 def detection_fin():
@@ -127,9 +122,9 @@ def restart():
     global comp, tabl, reverse, helped
     # récupération des variables à modifier en tant que variable globale
 
-    tabl = list(carre[0])
-    comp = list(carre[1])
-    reverse = carre[2]
+    tabl = list(CARRE[0])
+    comp = list(CARRE[1])
+    reverse = CARRE[2]
     # modification (ou création) du tableau de position et du tableau de rotation courant
     #  ainsi que de la variable indiquant si le parallélogramme est inversé
     helped = 2
@@ -178,10 +173,12 @@ def sav_res(res):
     """Change la résolution par défaut par celle sélectionnée par le joueur
      et la place dans le fichier qui est lu au démarrage du jeu
       pour initialiser les fenêtres"""
-    with open("sav_res.txt", "wb") as saved_resolution:
-        sav = pickle.Pickler(saved_resolution)
+    with open("sav_res.txt", "wb") as saved_resolution_file:
+        sav = pickle.Pickler(saved_resolution_file)
         sav.dump(res)
 
+    # création et centrage d'une fenêtre demandant au joueur de redémarrer l'application
+    #  pour que les changements prennent effet
     advise = Toplevel()
     redem = Label(advise, text="Vous devez relancer l'application"
                                " pour que les changements prennent effet !")
@@ -190,11 +187,6 @@ def sav_res(res):
     btn_quit.pack()
 
     geometry_fenetre(advise, 500, 50)
-    # création et centrage d'une fenêtre demandant au joueur de redémarrer l'application
-    #  pour que les changements prennent effet
-
-
-l_seuil_rotation = [24, 24, 24, 24, 24, 6, 12]
 
 
 def rotation_i(i_):
@@ -205,9 +197,6 @@ def rotation_i(i_):
         dict_piece[name_pieces[i_]].seth(comp[i_] * 15)
         s1.update()
     return aux
-
-
-l_rotations = [rotation_i(i) for i in range(7)]
 
 # Les 6 fonctions rotations sont nécessaires, car on ne peut pas récupérer l'objet curseur actif
 # au moment du clic. De plus, une fonction lambda ne peut pas recevoir d'argument ce qui rend son
@@ -238,7 +227,7 @@ def where(event):
     # lance la fonction détection pour voir si le tangram est terminé
 
 
-def level(lvl):
+def apply_level(lvl):
     """Cette fonction configure le jeu pour afficher le niveau choisi par l'utilisateur"""
     global tabl_end, comp_end, reverse_end
 
@@ -258,53 +247,33 @@ def see():
     global helped
 
     helped -= 1
-    # on décrémente helped (appelé en global) car l'aide est limitée à deux par jeu
+    # on décrémente helped (appelé en global) car l'aide est limitée par jeu
 
     if helped >= 0:
-        # si le joueur à droit à un peu d'aide, on l'aide
+        # si le joueur a droit à un peu d'aide, on l'aide
         curseur = [dict_piece[name] for name in name_pieces]
         fond = s1.bgpic()
-        # récupération du fond d'écran (permet de savoir à quel niveau on est
+        # récupération du fond d'écran (permet de savoir à quel niveau on est)
         cpt = len(curseur)
         j = randrange(0, cpt)
         # on tire un curseur au hasard
-        if fond == "HT/1000x700/canard.gif" or fond == "HT/500x350/canard.gif":
-            curseur[j].goto(canard[0][j])
-            curseur[j].seth(canard[1][j] * 15)
-            tabl[j] = canard[0][j]
-            comp[j] = canard[1][j]
-            if reverse != canard[3] \
-                    and (curseur[j].shape() == "para1" or curseur[j].shape() == "para2"):
-                reverse_para(False)
-        if fond == "HT/1000x700/lapin.gif" or fond == "HT/500x350/lapin.gif":
-            curseur[j].goto(lapin[0][j])
-            curseur[j].seth(lapin[1][j] * 15)
-            tabl[j] = lapin[0][j]
-            comp[j] = lapin[1][j]
-            if reverse != lapin[3] \
-                    and (curseur[j].shape() == "para1" or curseur[j].shape() == "para2"):
-                reverse_para(False)
-        if fond == "HT/1000x700/prosterne.gif" or fond == "HT/500x350/prosterne.gif":
-            curseur[j].goto(prosterne[0][j])
-            curseur[j].seth(prosterne[1][j] * 15)
-            tabl[j] = prosterne[0][j]
-            comp[j] = prosterne[1][j]
-            if reverse != prosterne[3] \
-                    and (curseur[j].shape() == "para1" or curseur[j].shape() == "para2"):
-                reverse_para(False)
-        if fond == "HT/1000x700/figure.gif" or fond == "HT/500x350/figure.gif":
-            curseur[j].goto(figure[0][j])
-            curseur[j].seth(figure[1][j] * 15)
-            tabl[j] = figure[0][j]
-            comp[j] = figure[1][j]
-            if reverse != figure[3] \
-                    and (curseur[j].shape() == "para1" or curseur[j].shape() == "para2"):
-                reverse_para(False)
-                # pour le niveau courant, on met le curseur tiré au hasard à sa place
-                # on le tourne correctement et on met à jour la table des positions et des rotations
-                # si le curseur tiré est dict_piece['para'],
-                # on regarde en plus s'il doit être retourné
-                # et on lance la fonction reverse_para qui se charge de mettre à jour reverse
+        dict_level = {"HT/1000x700/canard.gif": CANARD, "HT/500x350/canard.gif": CANARD,
+                      "HT/1000x700/lapin.gif": LAPIN, "HT/500x350/lapin.gif": LAPIN,
+                      "HT/1000x700/prosterne.gif": PROSTERNE, "HT/500x350/prosterne.gif": PROSTERNE,
+                      "HT/1000x700/figure.gif": FIGURE, "HT/500x350/figure.gif": FIGURE}
+        level_tout = dict_level[fond]
+        curseur[j].goto(level_tout[0][j])
+        curseur[j].seth(level_tout[1][j] * 15)
+        tabl[j] = level_tout[0][j]
+        comp[j] = level_tout[1][j]
+        if reverse != level_tout[3] \
+                and (curseur[j].shape() == "para1" or curseur[j].shape() == "para2"):
+            reverse_para(False)
+        # pour le niveau courant, on met le curseur tiré au hasard à sa place
+        # on le tourne correctement et on met à jour la table des positions et des rotations
+        # si le curseur tiré est dict_piece['para'],
+        # on regarde en plus s'il doit être retourné
+        # et on lance la fonction reverse_para qui se charge de mettre à jour reverse
     else:
         fen4 = Toplevel()
         attention = Label(fen4, text="Attention vous avez utilisé l'aide trop de fois ! ")
@@ -314,13 +283,14 @@ def see():
 
         geometry_fenetre(fen4, 300, 50)
 
-        # Si le joueur a utilisé deux fois l'aide, on lui signale à l'aide d'une fenêtre
+        # Si le joueur a utilisé trop de fois l'aide, on lui signale à l'aide d'une fenêtre
         #  qu'il ne peut plus utiliser cette fonction pour le moment.
 
     s1.update()
 
 
 name_pieces = ['tri1', 'tri2', 'trimoy', 'tripe1', 'tripe2', 'carre', 'para']
+l_seuil_rotation = [24, 24, 24, 24, 24, 6, 12]
 
 
 def tangram():
@@ -330,21 +300,21 @@ def tangram():
 
     fen2 = Toplevel()
     # Création d'une nouvelle fenêtre
-    cv1 = Canvas(fen2, width=T_fen, height=T_fen2)
+    cv1 = Canvas(fen2, width=config_res[res]["T_fen"], height=config_res[res]["T_fen2"])
     s1 = TurtleScreen(cv1)
     p = RawTurtle(s1)
     # Création d'un canvas Tkinter dans lequel on crée un écran turtle et un premier curseur nommé p
     dict_piece = {name: RawTurtle(s1) for name in name_pieces}
     # création des curseurs qui seront les éléments du Tangram
 
-    cv1.pack()
     # affichage du canvas(et donc de l'écran turtle)
+    cv1.pack()
+    # création des objets qui contiendront les couleurs des curseurs,
+    # On utilise ici des objets pour permettre la mise à jour simple des couleurs
+    # grâce à des boutons radio
     l_color = []
     for i in range(7):
         l_color.append(StringVar())
-    # création des objets qui contiendront les couleurs des curseurs,
-    # On utilise ici des objets pour permettre la mise à jour simple des couleurs
-    # grâce à des radiobutton
 
     with open("sav_color.txt", "rb") as sauvegarde_couleur:
         color_val = pickle.Unpickler(sauvegarde_couleur)
@@ -383,10 +353,10 @@ def tangram():
                         ["Blanc", "white"], ["Orange", "orange"], ["Bleu Ciel", "skyblue"],
                         ["Or", "gold"], ["Marron", "brown"]]
 
-    for i in liste_init:
-        color.add_cascade(label=i[0], menu=i[1])
-        for j in liste_init_color:
-            i[1].add_radiobutton(label=j[0], value=j[1], variable=i[2], command=color_init)
+    for i_label, i_menu, i_color in liste_init:
+        color.add_cascade(label=i_label, menu=i_menu)
+        for j_label, j_val in liste_init_color:
+            i_menu.add_radiobutton(label=j_label, value=j_val, variable=i_color, command=color_init)
 
     color.add_separator()
 
@@ -411,10 +381,12 @@ def tangram():
     niveaux = Menu(menu1, tearoff=0)
     menu1.add_cascade(label="Niveau", menu=niveaux)
 
-    niveaux.add_command(label="Canard", command=lambda: level(canard))
-    niveaux.add_command(label="Lapin", command=lambda: level(lapin))
-    niveaux.add_command(label="Homme prosterné", command=lambda: level(prosterne))
-    niveaux.add_command(label="Homme Rigolant", command=lambda: level(figure))
+    dict_levels = {"Canard": lambda: apply_level(CANARD),
+                   "Lapin": lambda: apply_level(LAPIN),
+                   "Homme prosterné": lambda: apply_level(PROSTERNE),
+                   "Homme rigolant": lambda: apply_level(FIGURE)}
+    for lab in dict_levels:
+        niveaux.add_command(label=lab, command=dict_levels[lab])
     # permet de choisir le niveau
 
     aide = Menu(menu1, tearoff=0)
@@ -435,7 +407,7 @@ def tangram():
     fen2.config(menu=menu1)
     # affectation du menu à notre fenêtre de jeu
 
-    geometry_fenetre(fen2, T_fen, T_fen2)
+    geometry_fenetre(fen2, config_res[res]["T_fen"], config_res[res]["T_fen2"])
     # centrage de la fenêtre de jeu
 
     p._tracer(8, 25)
@@ -447,6 +419,8 @@ def tangram():
     p.ht()
     p.up()
 
+    # pour créer les curseurs on enregistre une forme que l'on dessine avec le curseur p
+    # puis on l'enregistre en tant que shape pour notre écran turtle
     def register_shape_init(dessine_forme, l_name_shape, tortue=p, turtle_screen=s1):
         """Enregistre le polygone formé par dessine_forme"""
 
@@ -468,55 +442,52 @@ def tangram():
             tortue.end_poly()
         return aux
 
-    register_shape_init(tri_pe(cote / 4), ['tripe1', 'tripe2'])
-    register_shape_init(tri_pe(cote / 2), ['tri1', 'tri2'])
+    def tri_moy_(tortue):
+        cote_ = config_res[res]["cote"]
+        tortue.left(45)
+        tortue.fd(sqrt((cote_ / 2) ** 2 + (cote_ / 2) ** 2) / 2)
+        tortue.right(135)
+        tortue.fd(cote_ / 2)
+        tortue.right(90)
+        tortue.fd(cote_ / 2)
+        tortue.goto(0, 0)
 
-    def parallelo(tortue):
-        p.left(90)
-        p.fd(sqrt((cote / 2) ** 2 + (cote / 2) ** 2) / 4)
-        p.right(90)
-        p.fd(cote / 8)
-        p.right(90)
-        p.fd(cote / 4)
-        p.seth(225)
-        p.fd(sqrt((cote / 2) ** 2 + (cote / 2) ** 2) / 2)
-        p.seth(90)
-        p.fd(cote / 2)
-        p.seth(45)
-        p.fd(sqrt((cote / 2) ** 2 + (cote / 2) ** 2) / 2)
-        p.seth(270)
-        p.fd(cote / 4)
-        p.right(90)
-        p.fd(cote / 8)
-        p.goto(0, 0)
-        p.seth(0)
-    register_shape_init(parallelo, ['para1'])
+    register_shape_init(tri_pe(config_res[res]["cote"] / 2), ['tri1', 'tri2'])
+    register_shape_init(tri_pe(config_res[res]["cote"] / 4), ['tripe1', 'tripe2'])
 
-    p.begin_poly()
-    p.right(90)
-    p.fd(sqrt((cote / 2) ** 2 + (cote / 2) ** 2) / 4)
-    p.left(90)
-    p.fd(cote / 8)
-    p.right(90)
-    p.fd(cote / 4)
-    p.seth(135)
-    p.fd(sqrt((cote / 2) ** 2 + (cote / 2) ** 2) / 2)
-    p.seth(90)
-    p.fd(cote / 2)
-    p.seth(315)
-    p.fd(sqrt((cote / 2) ** 2 + (cote / 2) ** 2) / 2)
-    p.seth(0)
-    p.right(90)
-    p.fd(cote / 4)
-    p.right(90)
-    p.fd(cote / 8)
-    p.goto(0, 0)
-    p.end_poly()
-    para2 = p.get_poly()
-    s1.register_shape("para2", para2)
+    def parallelo_both(reverse_: bool = False):
+        cote_ = config_res[res]["cote"]
+
+        def parallelo(tortue):
+            dist = sqrt(2) * cote_ / 4
+            tortue.left(-90 if reverse_ else 90)
+            tortue.fd(dist / 2)
+            tortue.right(-90 if reverse_ else 90)
+            tortue.fd(cote_ / 8)
+            tortue.right(90)
+            tortue.fd(cote_ / 4)
+            tortue.seth(135 if reverse_ else 225)
+            tortue.fd(dist)
+            tortue.seth(90)
+            tortue.fd(cote_ / 2)
+            tortue.seth(315 if reverse_ else 45)
+            tortue.fd(dist)
+            tortue.seth(0 if reverse_ else 270)
+            if reverse_:
+                tortue.right(90)
+            tortue.fd(cote_ / 4)
+            tortue.right(90)
+            tortue.fd(cote_ / 8)
+            tortue.goto(0, 0)
+            if not reverse_:
+                tortue.seth(0)
+        return parallelo
+    register_shape_init(parallelo_both(), ['para1'])
+    register_shape_init(parallelo_both(reverse_=True), ['para2'])
 
     def carre_(tortue):
-        demi_size = sqrt((cote / 2) ** 2 + (cote / 2) ** 2) / 4
+        cote_ = config_res[res]["cote"]
+        demi_size = sqrt((cote_ / 2) ** 2 + (cote_ / 2) ** 2) / 4
         tortue.left(90)
 
         for trace in range(6):
@@ -527,25 +498,12 @@ def tangram():
         tortue.seth(0)
 
     register_shape_init(carre_, ['carre'])
+    register_shape_init(tri_moy_, ['trimoy'])
 
-    p.begin_poly()
-    p.left(45)
-    p.fd(sqrt((cote / 2) ** 2 + (cote / 2) ** 2) / 2)
-    p.right(135)
-    p.fd(cote / 2)
-    p.right(90)
-    p.fd(cote / 2)
-    p.goto(0, 0)
-    p.end_poly()
-    trimoy = p.get_poly()
-    s1.register_shape("trimoy", trimoy)
-
-    # pour créer les curseurs on enregistre une forme que l'on dessine avec le curseur p
-    # puis on l'enregistre en tant que shape pour notre écran turtle
 
     # Corps
 
-    level(canard)
+    apply_level(CANARD)
     # on choisit le niveau par défaut
 
     # le jeu est prêt on fait donc un restart pour que l'initialisation se termine
@@ -553,7 +511,7 @@ def tangram():
     restart()
 
     for i, name in enumerate(name_pieces):
-        dict_piece[name].onclick(l_rotations[i], btn=3)
+        dict_piece[name].onclick(rotation_i(i), btn=3)
 
         dict_piece[name].ondrag(dict_piece[name].goto)
     # initialisation des bindings pour que le joueur puisse faire tourner l'élément et le déplacer
@@ -580,12 +538,10 @@ fen = Tk()
 fen.title("Tangram Project")
 
 # Initialisation de la résolution
-
+# lecture dans sav_res.txt de la résolution du programme (par défaut 1000x700)
 with open("sav_res.txt", "rb") as saved_resolution:
     res_val = pickle.Unpickler(saved_resolution)
     res = res_val.load()
-# lecture dans sav_res.txt de la résolution du programme (par défaut 1000x700)
-
 
 image1 = PhotoImage(file=f"HT/{res}/Tangram.gif")
 image2 = PhotoImage(file=f"HT/{res}/main.gif")
@@ -596,89 +552,64 @@ image6 = PhotoImage(file=f"HT/{res}/end.gif")
 image7 = PhotoImage(file=f"HT/{res}/reco.gif")
 image8 = PhotoImage(file=f"HT/{res}/quitter_end.gif")
 
-if res == "1000x700":
-    # importation des images qui dépendent de la résolution (le fond des fenêtres)
-    T_fen = 1000
-    T_fen2 = 700
-    T_fen_end = 300
-    T_fen_end2 = 210
-    # configuration de la taille des fenêtres principales et de la fenêtre de fin de jeu
-    cote = 200
-    # taille du côté principal des éléments du tangram
-    xbtn = 410
-    ybtn = 252
-    xbtn1 = 400
-    ybtn1 = 375
-    xbtn2 = 400
-    ybtn2 = 490
-    xres = 5
-    yres = 140
-    xby = 180
-    yby = 137
-    # configuration des emplacements des différents boutons
-    # qui dépendent de la résolution contenue dans les fenêtres
-    carre = [[(409.00, 2.00), (308.00, -99.00), (257.00, 52.00), (358.00, 103.00), (258.00, 1.00),
-              (308.00, 53.00), (232.00, -34.00)], [0, 18, 18, 6, 12, 3, 6], False]
-    canard = [
-        [(-161.00, -21.00), (-160.00, -21.00), (-262.00, -91.00), (-384.00, 10.00), (-60.00, 30.00),
-         (-334.00, 61.00), (-309.00, -25.00)], [0, 12, 15, 12, 6, 3, 6], False,
-        f"HT/{res}/canard.gif"]
-    prosterne = [
-        [(-230.00, 26.00), (-154.00, 18.00), (-292.00, -21.00), (-304.00, 28.00), (-86.00, -107.00),
-         (-39.00, -25.00), (-319.00, -55.00)], [16, 13, 13, 19, 16, 2, 1], False,
-        f"HT/{res}/prosterne.gif"]
-    lapin = [[(-281.00, -115.00), (-251.00, -44.00), (-253.00, 128.00), (-200.00, -81.00),
-              (-250.00, -30.00),
-              (-216.00, 59.00), (-198.00, 137.00)], [3, 0, 21, 0, 12, 0, 4], False,
-             f"HT/{res}/lapin.gif"]
-    figure = [
-        [(-223.00, 16.00), (-240.00, -111.00), (-228.00, 138.00), (-285.00, 26.00),
-         (-322.00, 33.00), (-219.00, -39.00),
-         (-184.00, 131.00)], [15, 9, 0, 12, 9, 3, 9], True, "HT/1000x700/figure.gif"]
-    # tableaux contenant toutes les informations pour la réalisation des niveaux
-    # ( 1 : emplacement, 2 : rotation, 3 : valeur de reverse,
-    #  4 : emplacement de l'image de fond associée)
+# importation des images qui dépendent de la résolution (le fond des fenêtres)
+config_res = {
+    "1000x700": {
+        # configuration de la taille des fenêtres principales et de la fenêtre de fin de jeu
+        "T_fen": 1000, "T_fen2": 700, "T_fen_end": 300, "T_fen_end2": 210,
+        "cote": 200,  # taille du côté principal des éléments du tangram
+        # configuration des emplacements des différents boutons
+        # qui dépendent de la résolution contenue dans les fenêtres
+        "xbtn": 410, "ybtn": 252, "xbtn1": 400, "ybtn1": 375, "xbtn2": 400, "ybtn2": 490,
+        "xres": 5, "yres": 140, "xby": 180, "yby": 137
+    },
+    "500x350": {
+        # configuration de la taille des fenêtres principales et de la fenêtre de fin de jeu
+        "T_fen": 500, "T_fen2": 350, "T_fen_end": 150, "T_fen_end2": 105,
+        "cote": 100,  # taille du côté principal des éléments du tangram
+        # configuration des emplacements des différents boutons
+        # qui dépendent de la résolution contenue dans les fenêtres
+        "xbtn": 205, "ybtn": 126, "xbtn1": 200, "ybtn1": 188, "xbtn2": 200, "ybtn2": 245,
+        "xres": 3, "yres": 70, "xby": 90, "yby": 69
+    }
+}
+position_res = {
+    '1000x700': {
+        'CARRE': [(409.00, 2.00), (308.00, -99.00), (257.00, 52.00), (358.00, 103.00),
+                  (258.00, 1.00), (308.00, 53.00), (232.00, -34.00)],
+        'CANARD': [(-161.00, -21.00), (-160.00, -21.00), (-262.00, -91.00), (-384.00, 10.00),
+                   (-60.00, 30.00), (-334.00, 61.00), (-309.00, -25.00)],
+        'PROSTERNE': [(-230.00, 26.00), (-154.00, 18.00), (-292.00, -21.00), (-304.00, 28.00),
+                      (-86.00, -107.00), (-39.00, -25.00), (-319.00, -55.00)],
+        'LAPIN': [(-281.00, -115.00), (-251.00, -44.00), (-253.00, 128.00), (-200.00, -81.00),
+                  (-250.00, -30.00), (-216.00, 59.00), (-198.00, 137.00)],
+        'FIGURE': [(-223.00, 16.00), (-240.00, -111.00), (-228.00, 138.00), (-285.00, 26.00),
+                   (-322.00, 33.00), (-219.00, -39.00), (-184.00, 131.00)]
+    },
+    '500x350': {
+        'CARRE': [(204.5, 1.0), (154.0, -49.5), (128.5, 26.0), (179.0, 51.5), (129.0, 0.5),
+                  (154.0, 26.5), (116.0, -17.0)],
+        'CANARD': [(-80.5, -10.5), (-80.0, -10.5), (-131.0, -45.5), (-192.0, 5.0), (-30.0, 15.0),
+                   (-167.0, 30.5), (-154.5, -12.5)],
+        'PROSTERNE': [(-115.0, 13.0), (-77.0, 9.0), (-146.0, -10.5), (-152.0, 14.0), (-43.0, -53.5),
+                      (-19.5, -12.5), (-159.5, -27.5)],
+        'LAPIN': [(-140.5, -57.5), (-125.5, -22.0), (-126.5, 64.0), (-100.0, -40.5),
+                  (-125.0, -15.0), (-108.0, 29.5), (-99.0, 68.5)],
+        'FIGURE': [(-111.5, 8.0), (-120.0, -55.5), (-114.0, 69.0), (-142.5, 13.0), (-161.0, 16.5),
+                   (-109.5, -19.5), (-92.0, 65.5)]
+    }
+}
+# tableaux contenant toutes les informations pour la réalisation des niveaux
+# ( 1 : emplacement, 2 : rotation, 3 : valeur de reverse,
+#  4 : emplacement de l'image de fond associée)
+CARRE = [position_res[res]['CARRE'], [0, 18, 18, 6, 12, 3, 6], False, None]
+CANARD = [position_res[res]['CANARD'], [0, 12, 15, 12, 6, 3, 6], False, f"HT/{res}/canard.gif"]
+PROSTERNE = [position_res[res]['PROSTERNE'], [16, 13, 13, 19, 16, 2, 1], False,
+             f"HT/{res}/prosterne.gif"]
+LAPIN = [position_res[res]['LAPIN'], [3, 0, 21, 0, 12, 0, 4], False, f"HT/{res}/lapin.gif"]
+FIGURE = [position_res[res]['FIGURE'], [15, 9, 0, 12, 9, 3, 9], True, f"HT/{res}/figure.gif"]
 
-elif res == "500x350":
-    # import des images qui dépendent de la résolution (le fond des fenêtres)
-    T_fen = 500
-    T_fen2 = 350
-    T_fen_end = 150
-    T_fen_end2 = 105
-    # configuration de la taille des fenêtres principales et de la fenêtre de fin de jeu
-    cote = 100
-    # taille du côté principal des éléments du tangram
-    xbtn = 205
-    ybtn = 126
-    xbtn1 = 200
-    ybtn1 = 188
-    xbtn2 = 200
-    ybtn2 = 245
-    xres = 3
-    yres = 70
-    xby = 90
-    yby = 69
-    # configuration des emplacements des différents boutons
-    # qui dépendent de la résolution contenue dans les fenêtres
-    carre = [[(204.5, 1.0), (154.0, -49.5), (128.5, 26.0), (179.0, 51.5), (129.0, 0.5),
-              (154.0, 26.5), (116.0, -17.0)],
-             [0, 18, 18, 6, 12, 3, 6], False]
-    canard = [[(-80.5, -10.5), (-80.0, -10.5), (-131.0, -45.5), (-192.0, 5.0), (-30.0, 15.0),
-               (-167.0, 30.5), (-154.5, -12.5)],
-              [0, 12, 15, 12, 6, 3, 6], False, f"HT/{res}/canard.gif"]
-    prosterne = [[(-115.0, 13.0), (-77.0, 9.0), (-146.0, -10.5), (-152.0, 14.0), (-43.0, -53.5),
-                  (-19.5, -12.5), (-159.5, -27.5)],
-                 [16, 13, 13, 19, 16, 2, 1], False, f"HT/{res}/prosterne.gif"]
-    lapin = [[(-140.5, -57.5), (-125.5, -22.0), (-126.5, 64.0), (-100.0, -40.5), (-125.0, -15.0),
-              (-108.0, 29.5), (-99.0, 68.5)],
-             [3, 0, 21, 0, 12, 0, 4], False, f"HT/{res}/lapin.gif"]
-    figure = [[(-111.5, 8.0), (-120.0, -55.5), (-114.0, 69.0), (-142.5, 13.0), (-161.0, 16.5),
-               (-109.5, -19.5), (-92.0, 65.5)],
-              [15, 9, 0, 12, 9, 3, 9], True, f"HT/{res}/figure.gif"]
-    # tableaux contenant toutes les informations pour la réalisation des niveaux
-    # ( 1 : emplacement,2 : rotation, 3: value de reverse,
-    # 4 : emplacement de l'image de fond associée)
-else:
+if res not in ["1000x700", '500x350']:
     raise ValueError("Seules les résolutions 1000x700 ou 500x350 sont prévues.")
 
 # Fin de l'initialisation de la fenêtre
@@ -692,16 +623,16 @@ btn2 = Button(lab0, text="Quitter", command=fen.quit, image=image5)
 # de quitter le jeu ou d'afficher dans gedit le fichier crédits.txt
 
 # récupération de la position de la fenêtre (ne marche que sous linux)
-geometry_fenetre(fen, T_fen, T_fen2)
+geometry_fenetre(fen, config_res[res]["T_fen"], config_res[res]["T_fen2"])
 # centrage de la fenêtre
 
 lab0.pack(side='top', fill='both', expand=1)
 # affichage du fond
 
 fen.after(2500, lambda: [lab0.configure(image=image2),
-                         btn.place(x=xbtn, y=ybtn),
-                         btn1.place(x=xbtn1, y=ybtn1),
-                         btn2.place(x=xbtn2, y=ybtn2)]
+                         btn.place(x=config_res[res]["xbtn"], y=config_res[res]["ybtn"]),
+                         btn1.place(x=config_res[res]["xbtn1"], y=config_res[res]["ybtn1"]),
+                         btn2.place(x=config_res[res]["xbtn2"], y=config_res[res]["ybtn2"])]
           )
 # après 2,5 secondes, on change l'image de fond et on affiche les boutons configurés plus haut,
 #  cette ligne permet de créer l'animation du début
