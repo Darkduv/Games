@@ -8,6 +8,7 @@ This *Project* groups several projects on various games in Python
 
 - Abalone
 - Power Four *(see [repo](https://github.com/Darkduv/Power_Four))*
+- Tangram (and bonus) *(see [repo](https://github.com/Darkduv/Tangram_Project))*
 - Tetris
 
 ## Others
