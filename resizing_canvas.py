@@ -1,10 +1,8 @@
 from tkinter import *
 
 
-# a subclass of Canvas for dealing with resizing of windows
-
-
 class ResizingCanvas(Canvas):
+    """A subclass of Canvas for dealing with resizing of windows"""
     def __init__(self, parent, **kwargs):
         Canvas.__init__(self, parent, **kwargs)
         self.bind("<Configure>", self.on_resize)
@@ -13,15 +11,14 @@ class ResizingCanvas(Canvas):
 
     def on_resize(self, event):
         # determine the ratio of old width/height to new width/height
-        wscale = float(event.width) / self.width
-        hscale = float(event.height) / self.height
+        w_scale = float(event.width) / self.width
+        h_scale = float(event.height) / self.height
         self.width = event.width
         self.height = event.height
         # resize the canvas
         self.config(width=self.width, height=self.height)
         # rescale all the objects tagged with the "all" tag
-        self.scale("all", 0, 0, wscale, hscale)
-
+        self.scale("all", 0, 0, w_scale, h_scale)
 
 
 def main():
