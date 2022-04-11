@@ -34,7 +34,8 @@ class SuperList(list):
 
 class ListWeight(list):
 
-    """List of each position available with its weight : the list is in the form of [[position, weight],...]"""
+    """List of each position available with its weight :
+    the list is in the form of [[position, weight],...]"""
 
     def position_weight_max(self):
         if self:  # list not empty
