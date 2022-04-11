@@ -1,15 +1,15 @@
 from tkinter import *
 
-###########################################
-#  Jeu de ping                            #
-#  References : See the article of revue  #
-#  <Pour la science>, August 2002         #
-#                                         #
-# (C) Gerard Swinnen (Verviers, Belgium)  #
-# http://www.ulg.ac.be/cifen/inforef/swi  #
-#                                         #
-#  Version du 29/09/2002 - Licence : GPL  #
-###########################################
+################################################
+#  Game of Ping                                #
+#  References: See the article in the journal  #
+#  <Pour la science>, August 2002              #
+#                                              #
+# (C) Gerard Swinnen (Verviers, Belgium)       #
+# http://www.ulg.ac.be/cifen/inforef/swi       #
+#                                              #
+#  Version du 29/09/2002 - Licence : GPL       #
+################################################
 
 
 class MenuBar(Frame):
@@ -33,8 +33,8 @@ class MenuBar(Frame):
         help_menu = Menubutton(self, text='Help')
         help_menu.pack(side=LEFT, padx=5)
         me1 = Menu(help_menu)
-        me1.add_command(label='Principe dof the game', underline=0,
-                        command=boss.principe)
+        me1.add_command(label='Principle of the game', underline=0,
+                        command=boss.principle)
         me1.add_command(label='By the way ...', underline=0,
                         command=boss.by_the_way)
         help_menu.configure(menu=me1)
@@ -46,7 +46,7 @@ class Panel(Frame):
     def __init__(self):
         # The panel of game is constituted of a re-scaling grid
         # containing it-self a canvas. at each re-scaling of the
-        # grid,we calculate the tallest size possible for the
+        # grid, we calculate the tallest size possible for the
         # cases (squared) of the grid, et the dimensions of the
         # canvas are adapted in consequence.
         Frame.__init__(self)
@@ -75,8 +75,8 @@ class Panel(Frame):
         # the properties which are linked to the event of reconfiguration
         # contain all the new sizes of the panel :
         self.width, self.height = event.width - 4, event.height - 4
-        # The subtract of 4 pixels allowed to compensate the width
-        # of the 'highlightbordure" rolling the canvas)
+        # The subtraction of 4 pixels is here to compensate the width
+        # of the 'highlight bordure' rolling the canvas)
         self.trace_grille()
 
     def trace_grille(self):
@@ -92,21 +92,21 @@ class Panel(Frame):
         # Layout of the grid:
         self.can.delete(ALL)  # erasing of the past Layouts
         s = self.cote
-        for l in range(self.n_lig - 1):  # horizontal lines
+        for _ in range(self.n_lig - 1):  # horizontal lines
             self.can.create_line(0, s, wide, s, fill="white")
             s += self.cote
         s = self.cote
-        for c in range(self.n_col - 1):  # vertical lines
+        for _ in range(self.n_col - 1):  # vertical lines
             self.can.create_line(s, 0, s, high, fill="white")
             s += self.cote
-        # Layout of all the pawns, white or black according to the sate of the game :
-        for l in range(self.n_lig):
-            for c in range(self.n_col):
-                x1 = c * self.cote + 3  # size of pawns =
-                x2 = (c + 1) * self.cote - 3  # size of the case -10
-                y1 = l * self.cote + 3  #
-                y2 = (l + 1) * self.cote - 3
-                color = ["white", "black"][self.state[l][c]]
+        # Layout of all the pawns, white or black according to the s_ate of the game :
+        for l_ in range(self.n_lig):
+            for c_ in range(self.n_col):
+                x1 = c_ * self.cote + 3  # size of pawns =
+                x2 = (c_ + 1) * self.cote - 3  # size of the case -10
+                y1 = l_ * self.cote + 3  #
+                y2 = (l_ + 1) * self.cote - 3
+                color = ["white", "black"][self.state[l_][c_]]
                 self.can.create_oval(x1, y1, x2, y2, outline="grey",
                                      width=1, fill=color)
 
@@ -115,25 +115,25 @@ class Panel(Frame):
         # We start to determinate the line and the columns :
         lig, col = int(event.y / self.cote), int(event.x / self.cote)
         # we treat then the 8 adjacent cases :
-        for l in range(lig - 1, lig + 2):
-            if l < 0 or l >= self.n_lig:
+        for l_ in range(lig - 1, lig + 2):
+            if l_ < 0 or l_ >= self.n_lig:
                 continue
-            for c in range(col - 1, col + 2):
-                if c < 0 or c >= self.n_col:
+            for c_ in range(col - 1, col + 2):
+                if c_ < 0 or c_ >= self.n_col:
                     continue
-                if l == lig and c == col:
+                if l_ == lig and c_ == col:
                     continue
                 # Return of the pawn by logic inversion :
-                self.state[l][c] = not (self.state[l][c])
+                self.state[l_][c_] = not (self.state[l_][c_])
         self.trace_grille()
 
 
 class Ping(Frame):
-    """corps principal du programme"""
+    """Main body of the ping game"""
     def __init__(self):
         Frame.__init__(self)
         self.master.geometry("800x600")
-        self.master.title(" Jeu de Ping")
+        self.master.title("Game of ping")
 
         self.m_bar = MenuBar(self)
         self.m_bar.pack(side=TOP, expand=NO, fill=X)
@@ -174,8 +174,8 @@ class Ping(Frame):
         self.jeu.init_jeu()
         self.jeu.trace_grille()
 
-    def principe(self):
-        """window-message containing the small description of the principe of this game"""
+    def principle(self):
+        """window-message containing the small description of the principle of this game"""
         msg = Toplevel(self)
         Message(msg, bg="navy", fg="ivory", width=400,
                 font="Helvetica 10 bold",
