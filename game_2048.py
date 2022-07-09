@@ -46,7 +46,7 @@ class MatrixJeu:
         """
         if randint(1, 11) == 1:
             return 4
-        return 2  # return by chance one 2 or 4 with a probability of one 4 for twenty 2
+        return 2
 
     def add_number(self):
         """
@@ -166,7 +166,7 @@ class Panel(Frame):
         "Initialisation de la list de l'état du jeu"
         self.directions_possibles = ["Right", "Down", "Up", "Left"]
         self.matrix = MatrixJeu()
-        self.n_lig, self.n_col = 4, 4  # initial grid = 4 x 4
+        self.n_row, self.n_col = 4, 4  # initial grid = 4 x 4
 
         # Canvas :
         self.can = Canvas(self, bg="white", borderwidth=0, highlightthickness=1,
@@ -176,7 +176,7 @@ class Panel(Frame):
 
         # weigh et height maximal possible  for the squares :
         l_max = self.winfo_width() // self.n_col
-        h_max = self.winfo_height() // self.n_lig
+        h_max = self.winfo_height() // self.n_row
         # the side of the square will be the smallest of these dimensions :
         self.cote = min(l_max, h_max)
 
@@ -273,15 +273,15 @@ class Panel(Frame):
         # -> establishment of news dimensions for the canvas :
         # weigh et height maximal possible  for the squares :
         l_max = self.winfo_width() // self.n_col
-        h_max = self.winfo_height() // self.n_lig
+        h_max = self.winfo_height() // self.n_row
         # the side of the square will be the smallest of these dimensions :
         self.cote = min(l_max, h_max)
-        (width, height) = (self.cote * self.n_col, self.cote * self.n_lig)
+        (width, height) = (self.cote * self.n_col, self.cote * self.n_row)
         self.can.configure(width=width, height=height)
         # Layout of the grid :
         self.can.delete(ALL)  # Effacement older paints
         s = self.cote
-        for l in range(self.n_lig - 1):  # horizontal lines and vertical ones because n_lig = n_col
+        for l in range(self.n_row - 1):  # horizontal lines and vertical ones because n_row = n_col
             self.can.create_line(0, s, width, s, fill="black")
             self.can.create_line(s, 0, s, height, fill="black")
             s += self.cote
@@ -299,7 +299,7 @@ class Panel(Frame):
                 #                           fill="#" + hex(255 - 15 * color)[2:] + "fff")
 
         # Layout of all the numbers :
-        for l in range(self.n_lig):
+        for l in range(self.n_row):
             for c in range(self.n_col):
                 x = int((c + 1 / 2) * self.cote)
                 y = int((l + 1 / 2) * self.cote)

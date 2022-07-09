@@ -51,7 +51,7 @@ class Panel(Frame):
         # cases (squared) of the grid, et the dimensions of the
         # canvas are adapted in consequence.
         Frame.__init__(self)
-        self.n_lig, self.n_col = 8, 8  # initial grid = 4 x 4
+        self.n_row, self.n_col = 8, 8  # initial grid = 4 x 4
         # Link of the event <resize> with an adapted manager :
         self.bind("<Configure>", self.rescale)
         # Canvas :
@@ -77,10 +77,10 @@ class Panel(Frame):
         for i in range(12):  # (equal to a panel
             self.state.append([2] * 12)  # of 12 lines x 12 columns)
 
-        self.state[self.n_lig // 2 - 1][self.n_col // 2 - 1] = 0
-        self.state[self.n_lig // 2][self.n_col // 2] = 0
-        self.state[self.n_lig // 2 - 1][self.n_col // 2] = 1
-        self.state[self.n_lig // 2][self.n_col // 2 - 1] = 1
+        self.state[self.n_row // 2 - 1][self.n_col // 2 - 1] = 0
+        self.state[self.n_row // 2][self.n_col // 2] = 0
+        self.state[self.n_row // 2 - 1][self.n_col // 2] = 1
+        self.state[self.n_row // 2][self.n_col // 2 - 1] = 1
         self.nb_pawn_player = [2, 2]
         self.can_bis.configure(text=str(["White", "Black"][not self.player]) + "'s turn.\n \n" +
                                "White : " + str(self.nb_pawn_player[0]) + "\n" +
@@ -99,16 +99,16 @@ class Panel(Frame):
         """Layout of the grid, in function of dimensions and options"""
         # maximal width and height possibles for the cases :
         l_max = self.width / self.n_col
-        h_max = self.height / self.n_lig
+        h_max = self.height / self.n_row
         # the side of a case would be the smallest of the two dimensions :
         self.cote = min(l_max, h_max)
         # -> establishment of new dimensions for the canvas :
-        wide, high = self.cote * self.n_col, self.cote * self.n_lig
+        wide, high = self.cote * self.n_col, self.cote * self.n_row
         self.can.configure(width=wide, height=high)
         # Layout of the grid:
         self.can.delete(ALL)  # erasing of the past Layouts
         s = self.cote
-        for l in range(self.n_lig - 1):  # horizontal lines
+        for l in range(self.n_row - 1):  # horizontal lines
             self.can.create_line(0, s, wide, s, fill="white")
             s += self.cote
         s = self.cote
@@ -116,7 +116,7 @@ class Panel(Frame):
             self.can.create_line(s, 0, s, high, fill="white")
             s += self.cote
         # Layout of all the pawns, white or black according to the sate of the game :
-        for l in range(self.n_lig):
+        for l in range(self.n_row):
             for c in range(self.n_col):
                 x1 = c * self.cote + 3  # size of pawns =
                 x2 = (c + 1) * self.cote - 3  # size of the case -10
@@ -130,7 +130,7 @@ class Panel(Frame):
         """ return True if the case 'touch' a non-empty case, False else """
         for x in range(i - 1, i + 2):
             for y in range(j - 1, j + 2):
-                if 0 <= x < self.n_lig and 0 <= y < self.n_col and self.state[x][y] != 2:
+                if 0 <= x < self.n_row and 0 <= y < self.n_col and self.state[x][y] != 2:
                     return True
         return False
 
@@ -138,7 +138,7 @@ class Panel(Frame):
         list_ok = []
         self.player += 1
         self.player %= 2
-        for i in range(self.n_lig):
+        for i in range(self.n_row):
             for j in range(self.n_col):
                 if self.state[i][j] == 2 and self.roll(i, j):
                     for direction in [[0, 1], [1, 1], [1, 0], [0, -1], [-1, -1], [-1, 0], [-1, 1], [1, -1]]:
@@ -148,27 +148,27 @@ class Panel(Frame):
         self.player %= 2
         self.place_ok = list_ok
 
-    def movement_direction(self, direction, lig, col, test=True):
-        i = lig + direction[0]
+    def movement_direction(self, direction, row, col, test=True):
+        i = row + direction[0]
         j = col + direction[1]
         nb = 0
-        while 0 <= i < self.n_lig and 0 <= j < self.n_col and self.state[i][j] is not self.player and 2 != \
+        while 0 <= i < self.n_row and 0 <= j < self.n_col and self.state[i][j] is not self.player and 2 != \
                 self.state[i][j]:
             i += direction[0]
             j += direction[1]
             nb += 1
-        if nb > 0 and i != self.n_lig and j != self.n_col and self.state[i][j] == self.player:
+        if nb > 0 and i != self.n_row and j != self.n_col and self.state[i][j] == self.player:
             if test:
                 return True
             for k in range(1, nb + 1):
-                self.state[lig + k * direction[0]][col + k * direction[1]] = self.player
+                self.state[row + k * direction[0]][col + k * direction[1]] = self.player
                 self.nb_pawn_player[self.player] += 1
                 self.nb_pawn_player[not self.player] -= 1
                 color = ["white", "black", "dark olive green"][self.player]
                 self.can.create_oval((col + k * direction[1]) * self.cote + 3,
-                                     (lig + k * direction[0]) * self.cote + 3,
+                                     (row + k * direction[0]) * self.cote + 3,
                                      (col + k * direction[1] + 1) * self.cote - 3,
-                                     (lig + k * direction[0] + 1) * self.cote - 3,
+                                     (row + k * direction[0] + 1) * self.cote - 3,
                                      outline="grey", width=1, fill=color)
                 self.update()
                 self.can.after(200)
@@ -177,7 +177,7 @@ class Panel(Frame):
     def click(self, event):
         """Management of the mouse click : return the pawns"""
         # We start to determinate the line and the columns :
-        lig, col = int(event.y / self.cote), int(event.x / self.cote)
+        row, col = int(event.y / self.cote), int(event.x / self.cote)
         if not self.place_ok:
             self.verify()
 
@@ -186,20 +186,20 @@ class Panel(Frame):
             self.player %= 2
             self.verify()
 
-        if 0 <= lig < self.n_lig and 0 <= col < self.n_col and [lig, col] in self.place_ok:
+        if 0 <= row < self.n_row and 0 <= col < self.n_col and [row, col] in self.place_ok:
             self.place_ok = []
             self.player += 1
             self.player %= 2
-            self.state[lig][col] = self.player
+            self.state[row][col] = self.player
             self.nb_pawn_player[self.player] += 1
             color = ["white", "black", "dark olive green"][self.player]
-            self.can.create_oval(col * self.cote + 3, lig * self.cote + 3,
-                                 (col + 1) * self.cote - 3, (lig + 1) * self.cote - 3,
+            self.can.create_oval(col * self.cote + 3, row * self.cote + 3,
+                                 (col + 1) * self.cote - 3, (row + 1) * self.cote - 3,
                                  outline="grey", width=1, fill=color)
             self.update()
             self.can.after(200)
             for direction in [[0, 1], [1, 1], [1, 0], [0, -1], [-1, -1], [-1, 0], [-1, 1], [1, -1]]:
-                self.movement_direction(direction, lig, col, test=False)
+                self.movement_direction(direction, row, col, test=False)
 
             self.can_bis.configure(text=str(["White", "Black"][not self.player]) + "'s turn.\n \n" +
                                    "White : " + str(self.nb_pawn_player[0]) + "\n" +
@@ -228,25 +228,23 @@ class Ping(Frame):
         opt = Toplevel(self)
         cur_l = Scale(opt, length=200, label="Number of lines :",
                       orient=HORIZONTAL,
-                      from_=1, to=12, command=self.maj_lines)
-        cur_l.set(self.jeu.n_lig)  # initial position of the cursor
+                      from_=1, to=12, command=self.update_nb_rows)
+        cur_l.set(self.jeu.n_row)  # initial position of the cursor
         cur_l.pack()
         cur_h = Scale(opt, length=200, label="Number of columns :",
                       orient=HORIZONTAL,
-                      from_=1, to=12, command=self.maj_columns)
+                      from_=1, to=12, command=self.update_nb_cols)
         cur_h.set(self.jeu.n_col)
         cur_h.pack()
 
-    def maj_columns(self, n):
-        """maj_columns
-        :type self: Ping
-        """
+    def update_nb_cols(self, n):
+        """Updates the number of columns."""
         self.jeu.n_col = int(n)
         self.jeu.trace_grille()
 
-    def maj_lines(self, n):
-        """for giving a major of n"""
-        self.jeu.n_lig = int(n)
+    def update_nb_rows(self, n):
+        """Updates the number of rows."""
+        self.jeu.n_row = int(n)
         self.jeu.trace_grille()
 
     def reset(self):
