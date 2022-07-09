@@ -1,4 +1,4 @@
-from SuperMatrix import *
+from super_matrix import *
 # Todo : TwoPlayersGame, EvalFunction, Player, Situation
 
 
