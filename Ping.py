@@ -1,15 +1,20 @@
-from tkinter import *
+"""
+#################################################################
+#  Game of Ping                                                 #
+#  References: See  game of Ping in                             #
+#  https://www.inforef.be/swi/download/apprendre_python3_5.pdf  #
+#                                                               #
+# (C) Gerard Swinnen (Verviers, Belgium)                        #
+# (C) Maximin Duvillard (France)                                #
+#                                                               #
+#  Version du 29/09/2002 de Swinnen - Licence : GPL             #
+#  Version du 09/07/2023 de Maximin - Licence : GPL             #
+#################################################################
+"""
 
-################################################
-#  Game of Ping                                #
-#  References: See the article in the journal  #
-#  <Pour la science>, August 2002              #
-#                                              #
-# (C) Gerard Swinnen (Verviers, Belgium)       #
-# http://www.ulg.ac.be/cifen/inforef/swi       #
-#                                              #
-#  Version du 29/09/2002 - Licence : GPL       #
-################################################
+import numpy as np
+import tkinter
+from tkinter import *
 
 
 class MenuBar(Frame):
@@ -59,16 +64,14 @@ class Panel(Frame):
         # Link of the event <click of the mouse> with its manager :
         self.can.bind("<Button-1>", self.click)
         self.can.pack()
-        self.state = []  # construction of a list of lists
+        self.state = None
         self.width, self.height = 2, 2
         self.cote = 0
-        self.init_jeu()
+        self.init_state()  # setup state
 
-    def init_jeu(self):
+    def init_state(self):
         """Initialisation of the list which remember the state of the game"""
-        self.state = []
-        for i in range(12):  # (equal to a panel
-            self.state.append([0] * 12)  # of 12 lines x 12 columns)
+        self.state = np.zeros((12, 12), dtype=int)
 
     def rescale(self, event):
         """Operations made at each rescaling"""
@@ -99,7 +102,8 @@ class Panel(Frame):
         for _ in range(self.n_col - 1):  # vertical lines
             self.can.create_line(s, 0, s, high, fill="white")
             s += self.cote
-        # Layout of all the pawns, white or black according to the s_ate of the game :
+        # Layout of all the pawns,
+        # white or black according to the state of the game :
         for l_ in range(self.n_lig):
             for c_ in range(self.n_col):
                 x1 = c_ * self.cote + 3  # size of pawns =
@@ -110,10 +114,14 @@ class Panel(Frame):
                 self.can.create_oval(x1, y1, x2, y2, outline="grey",
                                      width=1, fill=color)
 
-    def click(self, event):
+    def click(self, event: tkinter.Event):
         """Management of the mouse click : return the pawns"""
         # We start to determinate the line and the columns :
         lig, col = int(event.y / self.cote), int(event.x / self.cote)
+        self.play(lig, col)
+
+    def play(self, lig: int, col: int) -> None:
+        """Operates the click on (lig, col)"""
         # we treat then the 8 adjacent cases :
         for l_ in range(lig - 1, lig + 2):
             if l_ < 0 or l_ >= self.n_lig:
@@ -124,7 +132,7 @@ class Panel(Frame):
                 if l_ == lig and c_ == col:
                     continue
                 # Return of the pawn by logic inversion :
-                self.state[l_][c_] = not (self.state[l_][c_])
+                self.state[l_][c_] = not self.state[l_][c_]
         self.trace_grille()
 
 
@@ -148,40 +156,45 @@ class Ping(Frame):
         opt = Toplevel(self)
         cur_l = Scale(opt, length=200, label="Number of lines :",
                       orient=HORIZONTAL,
-                      from_=1, to=12, command=self.maj_lines)
+                      from_=1, to=12, command=self.update_nb_lines)
         cur_l.set(self.jeu.n_lig)  # initial position of the cursor
         cur_l.pack()
         cur_h = Scale(opt, length=200, label="Number of columns :",
                       orient=HORIZONTAL,
-                      from_=1, to=12, command=self.maj_columns)
+                      from_=1, to=12, command=self.update_nb_cols)
         cur_h.set(self.jeu.n_col)
         cur_h.pack()
 
-    def maj_columns(self, n):
-        """maj_columns
-        :type self: Ping
-        """
+    def update_nb_cols(self, n):
+        """Updates the number of columns."""
         self.jeu.n_col = int(n)
         self.jeu.trace_grille()
 
-    def maj_lines(self, n):
-        """for giving a major of n"""
+    def update_nb_lines(self, n):
+        """Updates the number of lines."""
         self.jeu.n_lig = int(n)
         self.jeu.trace_grille()
 
     def reset(self):
         """  french!  """
-        self.jeu.init_jeu()
+        self.jeu.init_state()
         self.jeu.trace_grille()
 
     def principle(self):
-        """window-message containing the small description of the principle of this game"""
+        """Describes the principle of the game.
+
+        In a 'window message'"""
         msg = Toplevel(self)
         Message(msg, bg="navy", fg="ivory", width=400,
                 font="Helvetica 10 bold",
-                text="This is to do "
-                     "de"
-                     " grilles.\n A  !\n\n"
+                text="Les pions de ce jeu possèdent chacun une face blanche et"
+                     " une face noire. Lorsque l'on clique sur un pion, les 8"
+                     " pions adjacents se retournent.\nLe jeu consiste à"
+                     " essayer de les retourner tous.\n\nSi l'exercice se"
+                     " révèle très facile avec une grille de 2 x 2 cases, il"
+                     " devient plus difficile avec des grilles plus grandes."
+                     " Il est même tout à fait impossible avec certaines"
+                     " grilles.\nÀ vous de déterminer lesquelles !\n\n"
                      "Réf : revue 'Pour la Science' - August 2002") \
             .pack(padx=10, pady=10)
 
