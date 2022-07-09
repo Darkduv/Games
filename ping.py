@@ -55,7 +55,7 @@ class Panel(Frame):
         # cases (squared) of the grid, et the dimensions of the
         # canvas are adapted in consequence.
         Frame.__init__(self)
-        self.n_lig, self.n_col = 4, 4  # initial grid = 4 x 4
+        self.n_row, self.n_col = 4, 4  # initial grid = 4 x 4
         # Link of the event <resize> with an adapted manager :
         self.bind("<Configure>", self.rescale)
         # Canvas :
@@ -86,16 +86,16 @@ class Panel(Frame):
         """Layout of the grid, in function of dimensions and options"""
         # maximal width and height possibles for the cases :
         l_max = self.width / self.n_col
-        h_max = self.height / self.n_lig
+        h_max = self.height / self.n_row
         # the side of a case would be the smallest of the two dimensions :
         self.cote = min(l_max, h_max)
         # -> establishment of new dimensions for the canvas :
-        wide, high = self.cote * self.n_col, self.cote * self.n_lig
+        wide, high = self.cote * self.n_col, self.cote * self.n_row
         self.can.configure(width=wide, height=high)
         # Layout of the grid:
         self.can.delete(ALL)  # erasing of the past Layouts
         s = self.cote
-        for _ in range(self.n_lig - 1):  # horizontal lines
+        for _ in range(self.n_row - 1):  # horizontal lines
             self.can.create_line(0, s, wide, s, fill="white")
             s += self.cote
         s = self.cote
@@ -104,36 +104,43 @@ class Panel(Frame):
             s += self.cote
         # Layout of all the pawns,
         # white or black according to the state of the game :
-        for l_ in range(self.n_lig):
+        for l_ in range(self.n_row):
             for c_ in range(self.n_col):
                 x1 = c_ * self.cote + 3  # size of pawns =
                 x2 = (c_ + 1) * self.cote - 3  # size of the case -10
                 y1 = l_ * self.cote + 3  #
                 y2 = (l_ + 1) * self.cote - 3
-                color = ["white", "black"][self.state[l_][c_]]
+                color = ["white", "black"][self.state[l_, c_]]
                 self.can.create_oval(x1, y1, x2, y2, outline="grey",
                                      width=1, fill=color)
 
     def click(self, event: tkinter.Event):
         """Management of the mouse click : return the pawns"""
         # We start to determinate the line and the columns :
-        lig, col = int(event.y / self.cote), int(event.x / self.cote)
-        self.play(lig, col)
-
-    def play(self, lig: int, col: int) -> None:
-        """Operates the click on (lig, col)"""
-        # we treat then the 8 adjacent cases :
-        for l_ in range(lig - 1, lig + 2):
-            if l_ < 0 or l_ >= self.n_lig:
-                continue
-            for c_ in range(col - 1, col + 2):
-                if c_ < 0 or c_ >= self.n_col:
-                    continue
-                if l_ == lig and c_ == col:
-                    continue
-                # Return of the pawn by logic inversion :
-                self.state[l_][c_] = not self.state[l_][c_]
+        row, col = int(event.y / self.cote), int(event.x / self.cote)
+        self.play(row, col)
         self.trace_grille()
+
+    def play(self, row: int, col: int) -> None:
+        """Operates the click on (lig, col)"""
+        # we treat the 8 adjacent cases :
+        neighbours = np.array([[-1, -1], [-1, 0], [-1, 1],
+                          [0, -1], [0, 1],
+                          [1, -1], [1, 0], [1, 1]], dtype=int)
+        for dr, dc in neighbours:
+            row_neighbour = row + dr
+            col_neighbour = col + dc
+            if not self.is_in_the_grid(row_neighbour, col_neighbour):
+                continue
+            self.flip(row_neighbour, col_neighbour)
+
+    def flip(self, row: int, col: int) -> None:
+        """Flips the pawn in (row, col)"""
+        self.state[row, col] = not self.state[row, col]
+
+    def is_in_the_grid(self, row: int, col: int) -> bool:
+        """Checks if a position (row, col) is valide"""
+        return 0 <= row < 0 < self.n_row and 0 <= col < 0 < self.n_col
 
 
 class Ping(Frame):
@@ -157,7 +164,7 @@ class Ping(Frame):
         cur_l = Scale(opt, length=200, label="Number of lines :",
                       orient=HORIZONTAL,
                       from_=1, to=12, command=self.update_nb_lines)
-        cur_l.set(self.jeu.n_lig)  # initial position of the cursor
+        cur_l.set(self.jeu.n_row)  # initial position of the cursor
         cur_l.pack()
         cur_h = Scale(opt, length=200, label="Number of columns :",
                       orient=HORIZONTAL,
@@ -172,7 +179,7 @@ class Ping(Frame):
 
     def update_nb_lines(self, n):
         """Updates the number of lines."""
-        self.jeu.n_lig = int(n)
+        self.jeu.n_row = int(n)
         self.jeu.trace_grille()
 
     def reset(self):
