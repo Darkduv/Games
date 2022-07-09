@@ -21,6 +21,7 @@ from typing import Tuple, Callable, Optional, Union
 Position = Tuple[int, int]
 Color = str
 
+
 class Board:
     """Board : implement the game itself (the data)"""
 
