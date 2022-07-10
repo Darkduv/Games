@@ -12,6 +12,12 @@ class Draw(tkinter.Frame):
 
     def __init__(self):
         tkinter.Frame.__init__(self)
+
+        # making the parameters storing data on the selected object :
+        self.sel_object = None
+        self.x1 = None
+        self.y1 = None
+
         # Making the canvas
         self.c = tkinter.Canvas(self, width=400, height=300, bg='ivory')
         self.c.pack(padx=5, pady=3)
@@ -21,16 +27,14 @@ class Draw(tkinter.Frame):
         # when the mouse moves while button1 is pressed :
         self.c.bind("<Button1-Motion>", self.mouse_move)
         self.c.bind("<Button1-ButtonRelease>", self.mouse_up)
+
         # making an exit button:
         b_fin = tkinter.Button(self, text='Quit', bg='royal blue', fg='white',
                                font=('Helvetica', 10, 'bold'),
                                command=self.quit)
         b_fin.pack(pady=2)
-        self.pack()
 
-        self.sel_object = None
-        self.x1 = None
-        self.y1 = None
+        self.pack()
 
     @classmethod
     def rand_color(cls):
@@ -52,7 +56,8 @@ class Draw(tkinter.Frame):
         """Operation to make when the mouse left button is down"""
         self.x1, self.y1 = event.x, event.y
         # <find_closest> returns the reference of the closest drawn object :
-        self.sel_object = self.c.find_closest(self.x1, self.y1)
+        # it returns an int but in a tuple : (int,).
+        self.sel_object, = self.c.find_closest(self.x1, self.y1)
         # Changing the thickness of the drawing outline
         self.c.itemconfig(self.sel_object, width=3)
         # <lift> brings the drawing to the forefront :
@@ -67,9 +72,8 @@ class Draw(tkinter.Frame):
         self.c.move(self.sel_object, dx, dy)
         self.x1, self.y1 = x2, y2
 
-    def mouse_up(self, event: tkinter.Event):
+    def mouse_up(self, _: tkinter.Event):
         """Deselect the object"""
-        del event
         if not self.sel_object:
             return
         self.c.itemconfig(self.sel_object, width=1)
