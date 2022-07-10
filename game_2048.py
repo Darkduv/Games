@@ -14,6 +14,8 @@ from __future__ import annotations
 from enum import Enum
 from random import randint
 import tkinter
+from typing import Tuple
+
 import numpy as np
 
 
@@ -245,7 +247,7 @@ class Panel(tkinter.Frame):
             self.can.after(150)
 
     @property
-    def square_side(self):
+    def square_side(self) -> int:
         #  maximum possible width and height for the squares :
         l_max = self.winfo_width() // self.n_col
         h_max = self.winfo_height() // self.n_row
@@ -253,7 +255,7 @@ class Panel(tkinter.Frame):
         return min(l_max, h_max)
 
     @property
-    def shape(self):
+    def shape(self) -> Tuple[int, int]:
         return self.square_side * self.n_col, self.square_side * self.n_row
 
     def draw_grid(self):
