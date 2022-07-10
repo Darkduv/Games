@@ -10,20 +10,38 @@
 ###########################################
 """
 
+from __future__ import annotations
+from enum import Enum
 from random import randint
 import tkinter
 import numpy as np
 
 
-class Grid:
-    """Class with the numeric grid
+class InvalidError(Exception):
+    """Custom error raised if something invalid is done"""
 
-     and add_number, refresh, turn_tableau, mvt_gauche."""
+
+class Move(Enum):
+    """List of the possible directions for a move"""
+    LEFT = "Left"
+    RIGHT = "Right"
+    UP = "Up"
+    DOWN = "Down"
+
+    @classmethod
+    def map_values(cls) -> dict[str, Move]:
+        """Returns a dict of the form {value: move}"""
+        return {move.value: move for move in cls}
+
+    @classmethod
+    def val_to_move(cls, val: str) -> Move:
+        return cls.map_values()[val]
+
+
+class Grid:
+    """Class with the numeric grid"""
 
     def __init__(self):
-        """
-        :return: only init the game
-        """
         self.matrix = np.zeros((4, 4), dtype=int)
         self.power = np.array([[0] * 4] * 4)
         self.zeros = np.argwhere(self.matrix == np.zeros((4, 4), dtype=int))
@@ -31,7 +49,7 @@ class Grid:
         self.add_number()
         self.add_number()
 
-    def refresh(self):
+    def refresh(self) -> None:
         """Refreshes the following attributes : .zeros and .nb_zeros
         """
         self.zeros = np.argwhere(self.matrix == np.zeros((4, 4), dtype=int))
@@ -48,35 +66,29 @@ class Grid:
         """
         add 2 or 4, at random, to the numeric grid
         """
+        self.refresh()
+        if self.nb_zeros == 0:
+            raise InvalidError("Can't add a number : grid already filled")
+        n = randint(0, self.nb_zeros - 1)
+        [i, j] = self.zeros[n]
+        nb = self.number_random()
+        self.matrix[i][j] = nb
+        self.power[i][j] = nb // 2  # if 4: power=2, ok. if 2: power = 1, ok.
 
-        if self.nb_zeros != 0:
-            n = randint(0, self.nb_zeros - 1)
-            [i, j] = self.zeros[n]
-            nb = self.number_random()
-            if nb == 2:
-                self.matrix[i][j] = 2
-                self.power[i][j] = 1
-            else:
-                self.matrix[i][j] = 4
-                self.power[i][j] = 2
-            self.refresh()
-
-    def turn_tableau(self, orientation):
-        """
-        Turn the grid according to orientation.
+    def turn_grid(self, direction: Move):
+        """Turn the grid according to direction.
 
         With this method, only one move ( right to left ) needs to be coded
-        :param orientation:
         """
-        if orientation == "Right":
+        if direction == Move.RIGHT:
             self.matrix = np.rot90(self.matrix, 2)
             self.power = np.rot90(self.power, 2)
 
-        elif orientation == "Up":
+        elif direction == Move.UP:
             self.matrix = self.matrix.T
             self.power = self.power.T
 
-        elif orientation == "Down":
+        elif direction == Move.DOWN:
             self.matrix = np.rot90(self.matrix, 2)
             self.matrix = self.matrix.T
             self.power = np.rot90(self.power, 2)
@@ -97,22 +109,20 @@ class Grid:
             power += [0] * (4 - len(power))
             self.matrix[i] = np.array(m)
             self.power[i] = np.array(power)
-        self.refresh()
 
-    def mvt_gauche(self):
+    def move_to_the_left(self):
         """The move in itself"""
         for i in range(4):
             for j in range(3):
-                if self.matrix[i][j] == self.matrix[i][j + 1]:
-                    self.matrix[i][j] *= 2
-                    if self.matrix[i][j] != 0:
-                        self.power[i][j] += 1
+                if self.matrix[i, j] == self.matrix[i, j + 1]:
+                    self.matrix[i, j] *= 2
+                    if self.matrix[i, j] != 0:
+                        self.power[i, j] += 1
                     for k in range(j + 1, 3):
-                        self.matrix[i][k] = self.matrix[i][k + 1]
-                        self.power[i][k] = self.power[i][k + 1]
-                    self.matrix[i][3] = 0
-                    self.power[i][3] = 0
-        self.refresh()
+                        self.matrix[i, k] = self.matrix[i, k + 1]
+                        self.power[i, k] = self.power[i, k + 1]
+                    self.matrix[i, 3] = 0
+                    self.power[i, 3] = 0
 
     def equal(self, bis):
         """
@@ -121,9 +131,48 @@ class Grid:
         """
         for i in range(4):
             for j in range(4):
-                if self.matrix[i][j] != bis[i][j]:
+                if self.matrix[i, j] != bis[i, j]:
                     return False
         return True
+
+    def make_move(self, move: Move) -> None:
+        """makes the move. it must be verified"""
+        self.turn_grid(move)
+        self.shifts_left()
+        self.move_to_the_left()
+        self.turn_grid(move)
+
+    def find_moves(self) -> list[Move]:
+        """Checks if moves are possible.
+
+        Returns the list of possible moves.
+        the list can be empty => the player has lost.
+        """
+        new_tab = Grid()
+        new_tab.matrix = np.copy(self.matrix)
+        moves = list(Move)
+        moves_copy = moves.copy()
+
+        for i in range(3, -1, -1):
+            new_tab.matrix = np.copy(self.matrix)
+            new_tab.make_move(moves_copy[i])
+
+            if self.equal(new_tab.matrix):
+                moves.pop(i)
+
+        return moves
+
+    def game_round(self, move: Move) -> bool:
+        """One round. Returns True if lost game, else False"""
+        possible_moves = self.find_moves()
+        if not possible_moves:  # empty
+            return True
+        if move not in possible_moves:
+            return False
+        self.make_move(move)
+        self.refresh()
+        self.add_number()
+        return False
 
 
 class MenuBar(tkinter.Frame):
@@ -157,9 +206,6 @@ class Panel(tkinter.Frame):
 
     def __init__(self):
         super().__init__()
-        self.verified = True  # will contain if displacements still possible
-        "Initialisation de la list de l'état du jeu"
-        self.directions_possibles = ["Right", "Down", "Up", "Left"]
         self.matrix = Grid()
         self.n_row, self.n_col = 4, 4  # initial grid = 4 x 4
 
@@ -186,86 +232,24 @@ class Panel(tkinter.Frame):
         self.can.bind("<Key>", self.move)
         self.can.pack()
 
-    def verify(self):
-        """Checks if movements are possible.
+    # def re_scale(self, event):
+    # """ for rescaling the grid """
+    # width, height = event.width, event.height
+    # self.draw_grid(width, height)
 
-        If yes, put the list of possible moves in self.directions_possibles
-        otherwise put False in `self.verified` => the player has lost.
-        """
-        new_tab = Grid()
-        new_tab.matrix = np.copy(self.matrix.matrix)
-        self.verified = True
-        self.directions_possibles = ["Right", "Down", "Up", "Left"]
-        sens = self.directions_possibles
-
-        for i in range(3, -1, -1):
-            new_tab.matrix = np.copy(self.matrix.matrix)
-            new_tab.turn_tableau(sens[i])
-            new_tab.shifts_left()
-            new_tab.mvt_gauche()
-            new_tab.turn_tableau(sens[i])
-            new_tab.refresh()
-
-            if self.matrix.equal(new_tab.matrix):
-                self.directions_possibles.pop(i)
-
-        if len(self.directions_possibles) == 0:
-            self.verified = False
-
-    def game_round(self, orientation):
-        """One round"""
-        self.verify()
-        if self.verified:
-            if orientation in self.directions_possibles:
-                self.matrix.turn_tableau(orientation)
-                self.matrix.shifts_left()
-                self.matrix.mvt_gauche()
-                self.matrix.turn_tableau(orientation)
-                self.matrix.refresh()
-                self.matrix.add_number()
-                self.directions_possibles = ["Right", "Down", "Up", "Left"]
-            self.verify()
-            if not self.verified:
-                self.trace_grille()
-                message = self.can.create_text(
-                    2*self.cote, 2*self.cote, text="",
-                    font="Helvetica 30 bold", fill='Black')
-                for _ in range(5):
-                    self.can.itemconfig(message, text="You've lost!!")
-                    self.can.update()
-                    self.can.after(500)
-                    self.can.itemconfig(message, text="")
-                    self.can.update()
-                    self.can.after(150)
-
-                self.can.itemconfig(message, text="You aren't very good!!!",
-                                    fill="Red")
-                self.can.update()
-                self.can.after(1500)
-
-        else:
-            message = self.can.create_text(2*self.cote, 2*self.cote, text="",
-                                           font="Helvetica 30 bold",
-                                           fill='Black')
-            for _ in range(5):
-                self.can.itemconfig(message, text="You've lost!!")
-                self.can.update()
-                self.can.after(500)
-                self.can.itemconfig(message, text="")
-                self.can.update()
-                self.can.after(150)
-
-            self.can.itemconfig(message,
-                                text="What a pity you are !!!", fill="Red")
+    def lost(self) -> None:
+        message = self.can.create_text(2 * self.cote, 2 * self.cote, text="",
+                                       font="Helvetica 30 bold",
+                                       fill='Black')
+        for _ in range(5):
+            self.can.itemconfig(message, text="You've lost!")
             self.can.update()
-            self.can.after(1500)
+            self.can.after(500)
+            self.can.itemconfig(message, text="")
+            self.can.update()
+            self.can.after(150)
 
-            # def re_scale(self, event):
-            # """ for rescaling the grid """
-            # width, height = event.width, event.height
-            # self.trace_grille(width, height)
-
-    def trace_grille(self):
+    def draw_grid(self):
         """Layout of the grid, according to des options & dimensions"""
         # -> establishment of news dimensions for the canvas :
         # weigh et height maximal possible  for the squares :
@@ -286,12 +270,10 @@ class Panel(tkinter.Frame):
         c = self.cote
         for i in range(4):
             for j in range(4):
-                color = self.matrix.power[i][j]
+                power = self.matrix.power[i][j]
                 self.can.create_rectangle(
                     j * c, i * c, (j+1) * c, (i + 1) * c, outline="grey",
-                    width=1, fill=f"#{hex(255 - 15 * color)[2:]}"
-                                  f"{hex(255 - color * (36 - 2 * color))[2:]}"
-                                  f"{hex(250 - color)[2:]}")
+                    width=1, fill=self.color(power))
 
                 # self.can.create_rectangle(
                 #     j * c, i * c, (j+1) * c, (i + 1) * c, outline="grey",
@@ -306,11 +288,22 @@ class Panel(tkinter.Frame):
                 self.can.create_text(x, y, text=str(self.matrix.matrix[r][c]),
                                      font="Helvetica 30 normal", fill="black")
 
+    @staticmethod
+    def color(power: int) -> str:
+        """Returns a string '#RRGGBB' of color"""
+        rr = hex(255 - 15 * power)[2:]
+        gg = hex(255 - power * (36 - 2 * power))[2:]
+        bb = hex(250 - power)[2:]
+        col = f"#{rr}{gg}{bb}"
+        return col
+
     def move(self, event):
         """Handles the event <Key> """
-        if event.keysym in ["Left", "Right", "Up", "Down"]:
-            self.game_round(event.keysym)
-            self.trace_grille()
+        if event.keysym in Move.map_values():
+            lost = self.matrix.game_round(Move.val_to_move(event.keysym))
+            self.draw_grid()
+            if lost:
+                self.lost()
 
 
 class Game2048(tkinter.Frame):
@@ -332,7 +325,7 @@ class Game2048(tkinter.Frame):
     def reset(self):
         """with the menu, reset the game"""
         self.jeu.init_jeu()
-        self.jeu.trace_grille()
+        self.jeu.draw_grid()
 
     def principe(self):
         """window-message containing la description rapid du principe du jeu"""
