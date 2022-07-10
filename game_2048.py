@@ -1,10 +1,4 @@
-""" Game of 2048 ... """
-
-from random import randint
-from tkinter import *
-import numpy as np
-
-
+"""
 ###########################################
 #                                         #
 #              Jeu de 2048                #
@@ -12,13 +6,19 @@ import numpy as np
 #                                         #
 #                                         #
 #                                         #
-#                                         #
 #  Version du 29/02/2016 - License : Non  #
 ###########################################
+"""
+
+from random import randint
+import tkinter
+import numpy as np
 
 
-class MatrixJeu:
-    """Class with the numeric grid and add_number, refresh, turn_tableau, mvt_gauche. """
+class Grid:
+    """Class with the numeric grid
+
+     and add_number, refresh, turn_tableau, mvt_gauche."""
 
     def __init__(self):
         """
@@ -32,26 +32,21 @@ class MatrixJeu:
         self.add_number()
 
     def refresh(self):
-        """
-        refresh the following attributes of the MatrixJeu object: .zeros and .nb_zeros
+        """Refreshes the following attributes : .zeros and .nb_zeros
         """
         self.zeros = np.argwhere(self.matrix == np.zeros((4, 4), dtype=int))
         self.nb_zeros = np.size(self.zeros, 0)
 
     @staticmethod
-    def number_random():
+    def number_random(prop: int = 10) -> int:
+        """Returns randomly 2 or 4 with a probability of one 4 for `prop` 2
         """
-        random int
-        :return: 2 or 4, with a probability of one 4 for twenty 2
-        """
-        if randint(1, 11) == 1:
-            return 4
-        return 2
+        is_four = randint(0, prop) == 0
+        return 4 if is_four else 2
 
-    def add_number(self):
+    def add_number(self) -> None:
         """
-        add 2 or 4, at random, to the numeric grid ( here it's to self.matrix )
-        :rtype : None
+        add 2 or 4, at random, to the numeric grid
         """
 
         if self.nb_zeros != 0:
@@ -70,7 +65,7 @@ class MatrixJeu:
         """
         Turn the grid according to orientation.
 
-        With this method, only one movement ( right to left ) needs to be coded
+        With this method, only one move ( right to left ) needs to be coded
         :param orientation:
         """
         if orientation == "Right":
@@ -87,10 +82,10 @@ class MatrixJeu:
             self.power = np.rot90(self.power, 2)
             self.power = self.power.T
 
-    def decal_gauche(self):
-        """Before movement in itself : transform [2,3,0,4] in [2,3,4,0]
+    def shifts_left(self):
+        """Before move in itself : transform [2,3,0,4] in [2,3,4,0]
 
-        (easier to manipulate for the movement)"""
+        (easier to manipulate for the move)"""
         for i in range(4):
             m = []
             power = []
@@ -105,7 +100,7 @@ class MatrixJeu:
         self.refresh()
 
     def mvt_gauche(self):
-        """The movement in itself"""
+        """The move in itself"""
         for i in range(4):
             for j in range(3):
                 if self.matrix[i][j] == self.matrix[i][j + 1]:
@@ -131,15 +126,15 @@ class MatrixJeu:
         return True
 
 
-class MenuBar(Frame):
+class MenuBar(tkinter.Frame):
     """Barre de menus scrolling"""
 
     def __init__(self, boss=None):
-        super().__init__(borderwidth=2, relief=GROOVE)
+        super().__init__(borderwidth=2, relief=tkinter.GROOVE)
         # #### Menu <File> #####
-        file_menu = Menubutton(self, text='File')
-        file_menu.pack(side=LEFT, padx=5)
-        me1 = Menu(file_menu)
+        file_menu = tkinter.Menubutton(self, text='File')
+        file_menu.pack(side=tkinter.LEFT, padx=5)
+        me1 = tkinter.Menu(file_menu)
         me1.add_command(label='Restart', underline=0,
                         command=boss.reset)
         me1.add_command(label='Quit', underline=0,
@@ -147,9 +142,9 @@ class MenuBar(Frame):
         file_menu.configure(menu=me1)
 
         # #### Menu <Help> #####
-        help_menu = Menubutton(self, text='Help')
-        help_menu.pack(side=LEFT, padx=5)
-        me1 = Menu(help_menu)
+        help_menu = tkinter.Menubutton(self, text='Help')
+        help_menu.pack(side=tkinter.LEFT, padx=5)
+        me1 = tkinter.Menu(help_menu)
         me1.add_command(label='Principe du jeu', underline=0,
                         command=boss.principe)
         me1.add_command(label='More ...', underline=0,
@@ -157,7 +152,7 @@ class MenuBar(Frame):
         help_menu.configure(menu=me1)
 
 
-class Panel(Frame):
+class Panel(tkinter.Frame):
     """Panel de jeu (grille de n x m cases)"""
 
     def __init__(self):
@@ -165,12 +160,13 @@ class Panel(Frame):
         self.verified = True  # will contain if displacements still possible
         "Initialisation de la list de l'état du jeu"
         self.directions_possibles = ["Right", "Down", "Up", "Left"]
-        self.matrix = MatrixJeu()
+        self.matrix = Grid()
         self.n_row, self.n_col = 4, 4  # initial grid = 4 x 4
 
         # Canvas :
-        self.can = Canvas(self, bg="white", borderwidth=0, highlightthickness=1,
-                          highlightbackground="black")
+        self.can = tkinter.Canvas(self, bg="white", borderwidth=0,
+                                  highlightthickness=1,
+                                  highlightbackground="black")
         # self.can.bind("<Configure>", self.re_scale)
         self.can.pack()
 
@@ -185,18 +181,18 @@ class Panel(Frame):
     def init_jeu(self):
         """beginning of the Game"""
         # Link of the event <key of the keyboard>to his manager :
-        self.matrix = MatrixJeu()
+        self.matrix = Grid()
         self.can.focus_set()
-        self.can.bind("<Key>", self.movement)
+        self.can.bind("<Key>", self.move)
         self.can.pack()
 
     def verify(self):
+        """Checks if movements are possible.
+
+        If yes, put the list of possible moves in self.directions_possibles
+        otherwise put False in `self.verified` => the player has lost.
         """
-        This function verifies if movements are possible.
-        if yes, put the list of the possible movement in self.directions_possibles
-        else put False in self.verified => the gamer have lost.
-        """
-        new_tab = MatrixJeu()
+        new_tab = Grid()
         new_tab.matrix = np.copy(self.matrix.matrix)
         self.verified = True
         self.directions_possibles = ["Right", "Down", "Up", "Left"]
@@ -205,7 +201,7 @@ class Panel(Frame):
         for i in range(3, -1, -1):
             new_tab.matrix = np.copy(self.matrix.matrix)
             new_tab.turn_tableau(sens[i])
-            new_tab.decal_gauche()
+            new_tab.shifts_left()
             new_tab.mvt_gauche()
             new_tab.turn_tableau(sens[i])
             new_tab.refresh()
@@ -216,16 +212,13 @@ class Panel(Frame):
         if len(self.directions_possibles) == 0:
             self.verified = False
 
-    def tour_de_jeu(self, orientation):
-        """
-        one iteration
-        :param orientation:
-        """
+    def game_round(self, orientation):
+        """One round"""
         self.verify()
         if self.verified:
             if orientation in self.directions_possibles:
                 self.matrix.turn_tableau(orientation)
-                self.matrix.decal_gauche()
+                self.matrix.shifts_left()
                 self.matrix.mvt_gauche()
                 self.matrix.turn_tableau(orientation)
                 self.matrix.refresh()
@@ -234,8 +227,9 @@ class Panel(Frame):
             self.verify()
             if not self.verified:
                 self.trace_grille()
-                message = self.can.create_text(2*self.cote, 2*self.cote, text="",
-                                               font="Helvetica 30 bold", fill='Black')
+                message = self.can.create_text(
+                    2*self.cote, 2*self.cote, text="",
+                    font="Helvetica 30 bold", fill='Black')
                 for _ in range(5):
                     self.can.itemconfig(message, text="You've lost!!")
                     self.can.update()
@@ -244,13 +238,15 @@ class Panel(Frame):
                     self.can.update()
                     self.can.after(150)
 
-                self.can.itemconfig(message, text="You aren't very good!!!", fill="Red")
+                self.can.itemconfig(message, text="You aren't very good!!!",
+                                    fill="Red")
                 self.can.update()
                 self.can.after(1500)
 
         else:
             message = self.can.create_text(2*self.cote, 2*self.cote, text="",
-                                           font="Helvetica 30 bold", fill='Black')
+                                           font="Helvetica 30 bold",
+                                           fill='Black')
             for _ in range(5):
                 self.can.itemconfig(message, text="You've lost!!")
                 self.can.update()
@@ -259,7 +255,8 @@ class Panel(Frame):
                 self.can.update()
                 self.can.after(150)
 
-            self.can.itemconfig(message, text="What a pity you are !!!", fill="Red")
+            self.can.itemconfig(message,
+                                text="What a pity you are !!!", fill="Red")
             self.can.update()
             self.can.after(1500)
 
@@ -279,9 +276,10 @@ class Panel(Frame):
         (width, height) = (self.cote * self.n_col, self.cote * self.n_row)
         self.can.configure(width=width, height=height)
         # Layout of the grid :
-        self.can.delete(ALL)  # Effacement older paints
+        self.can.delete(tkinter.ALL)  # Effacement older paints
         s = self.cote
-        for l in range(self.n_row - 1):  # horizontal lines and vertical ones because n_row = n_col
+        # horizontal lines and vertical ones because n_row = n_col
+        for _ in range(self.n_row - 1):
             self.can.create_line(0, s, width, s, fill="black")
             self.can.create_line(s, 0, s, height, fill="black")
             s += self.cote
@@ -289,33 +287,34 @@ class Panel(Frame):
         for i in range(4):
             for j in range(4):
                 color = self.matrix.power[i][j]
-                self.can.create_rectangle(j * c, i * c, (j+1) * c, (i + 1) * c,
-                                          outline="grey", width=1,
-                                          fill="#" + hex(255 - 15 * color)[2:]
-                                               + hex(255 - color * (36 - 2 * color))[2:]
-                                               + hex(250 - color)[2:])
-                # self.can.create_rectangle(j * c, i * c, (j+1) * c, (i + 1) * c,
-                #                           outline="grey", width=0,
-                #                           fill="#" + hex(255 - 15 * color)[2:] + "fff")
+                self.can.create_rectangle(
+                    j * c, i * c, (j+1) * c, (i + 1) * c, outline="grey",
+                    width=1, fill=f"#{hex(255 - 15 * color)[2:]}"
+                                  f"{hex(255 - color * (36 - 2 * color))[2:]}"
+                                  f"{hex(250 - color)[2:]}")
+
+                # self.can.create_rectangle(
+                #     j * c, i * c, (j+1) * c, (i + 1) * c, outline="grey",
+                #     width=0, fill=f"#{hex(255 - 15 * color)[2:]}fff")
 
         # Layout of all the numbers :
-        for l in range(self.n_row):
+        for r in range(self.n_row):
             for c in range(self.n_col):
                 x = int((c + 1 / 2) * self.cote)
-                y = int((l + 1 / 2) * self.cote)
+                y = int((r + 1 / 2) * self.cote)
                 # self.can.create_rectangle()
-                self.can.create_text(x, y, text=str(self.matrix.matrix[l][c]),
+                self.can.create_text(x, y, text=str(self.matrix.matrix[r][c]),
                                      font="Helvetica 30 normal", fill="black")
 
-    def movement(self, event):
-        """the manager of the event <Key> """
+    def move(self, event):
+        """Handles the event <Key> """
         if event.keysym in ["Left", "Right", "Up", "Down"]:
-            self.tour_de_jeu(event.keysym)
+            self.game_round(event.keysym)
             self.trace_grille()
 
 
-class JeuFinal(Frame):
-    """corps principal du programme"""
+class Game2048(tkinter.Frame):
+    """Main body of the game"""
 
     def __init__(self):
         super().__init__()
@@ -323,10 +322,10 @@ class JeuFinal(Frame):
         self.master.title("Jeu de 2048")
 
         self.m_bar = MenuBar(self)
-        self.m_bar.pack(side=TOP, expand=NO, fill=X)
+        self.m_bar.pack(side=tkinter.TOP, expand=tkinter.NO, fill=tkinter.X)
 
         self.jeu = Panel()
-        self.jeu.pack(expand=YES, fill=BOTH, padx=8, pady=8)
+        self.jeu.pack(expand=tkinter.YES, fill=tkinter.BOTH, padx=8, pady=8)
 
         self.pack()
 
@@ -337,27 +336,28 @@ class JeuFinal(Frame):
 
     def principe(self):
         """window-message containing la description rapid du principe du jeu"""
-        msg = Toplevel(self)
-        Message(msg, bg="navy", fg="ivory", width=400,
-                font="Helvetica 10 bold",
-                text="This game in moving the numbers in the four directions "
-                     "(left, right, up and down) and the adjacent (in the "
-                     "axis of the direction are added if they are the same. "
-                     "The initial grid contain two numbers 2 or 4 placed "
-                     "by chance in the grid. At each movement one 2 or one "
-                     "appears in the grid. The purpose is to reach 2048 or "
-                     "more. For giving the direction of the wanted movement, "
-                     "type the corresponding arrow on the keyboard. You lost "
-                     "if you couldn't any lore do a movement.") \
+        msg = tkinter.Toplevel(self)
+        tkinter.Message(
+            msg, bg="navy", fg="ivory", width=400,
+            font="Helvetica 10 bold",
+            text="This game in moving the numbers in the four directions "
+                 "(left, right, up and down) and the adjacent (in the "
+                 "axis of the direction are added if they are the same. "
+                 "The initial grid contain two numbers 2 or 4 placed "
+                 "by chance in the grid. At each move one 2 or one "
+                 "appears in the grid. The purpose is to reach 2048 or "
+                 "more. For giving the direction of the wanted move, "
+                 "type the corresponding arrow on the keyboard. You lost "
+                 "if you couldn't any lore do a move.") \
             .pack(padx=10, pady=10)
 
     def by_the_way(self):
         """window-message indicating author and type of the licence"""
-        msg = Toplevel(self)
-        Message(msg, width=200, aspect=100, justify=CENTER,
-                text="2048 \n \n coding by Max. Duv. , February 2016.\n"
-                     "Licence = none").pack(padx=10, pady=10)
+        msg = tkinter.Toplevel(self)
+        tkinter.Message(msg, width=200, aspect=100, justify=tkinter.CENTER,
+                        text="2048 \n\n coding by Max. Duv. , February 2016.\n"
+                        "Licence = none").pack(padx=10, pady=10)
 
 
 if __name__ == '__main__':
-    JeuFinal().mainloop()
+    Game2048().mainloop()
