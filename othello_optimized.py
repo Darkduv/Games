@@ -76,7 +76,7 @@ class Panel(tkinter.Frame):
         """Initialisation of the list which remember the state of the game"""
         self.state = []
         self.player = 0
-        for i in range(12):  # equal to a panel
+        for _ in range(12):  # equal to a panel
             self.state.append([2] * 12)  # of 12 lines x 12 columns
 
         self.state[self.n_row // 2 - 1][self.n_col // 2 - 1] = 0
