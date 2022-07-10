@@ -1,7 +1,8 @@
-from tkinter import *
+"""Test/Example using canvas"""
+import tkinter
 
-root = Tk()
-drawing_zone = Canvas(root, width=500, height=500)
+root = tkinter.Tk()
+drawing_zone = tkinter.Canvas(root, width=500, height=500)
 drawing_zone.pack()
 drawing_zone.create_line(0, 0, 500, 500)
 drawing_zone.create_rectangle(490, 200, 500, 100)
@@ -11,7 +12,8 @@ drawing_zone.create_text(100, 100, text="hello")
 drawing_zone.create_oval(400, 400, 300, 300, outline="gray",
                          width=1, fill="#%02x%02x%02x" % (255, 3, 77))
 # Example of drawing a polygon: the coordinates of the points must be given
-drawing_zone.create_polygon(100, 200, 200, 200, 250, 290, 200, 380, 100, 380, 50, 290,
+drawing_zone.create_polygon(100, 200, 200, 200, 250, 290, 200, 380,
+                            100, 380, 50, 290,
                             outline="red", width=2, fill="yellow")
 
 
@@ -22,7 +24,7 @@ def quit_(event):
         root.destroy()
 
 
-exit_button = Button(root, text="Exit", command=root.destroy)
+exit_button = tkinter.Button(root, text="Exit", command=root.destroy)
 exit_button.pack()
 
 drawing_zone.focus_set()
