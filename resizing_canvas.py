@@ -1,7 +1,9 @@
-from tkinter import *
+"""Try creating a resizing canvas"""
+
+import tkinter
 
 
-class ResizingCanvas(Canvas):
+class ResizingCanvas(tkinter.Canvas):
     """A subclass of Canvas for dealing with resizing of windows"""
     def __init__(self, parent, **kwargs):
         Canvas.__init__(self, parent, **kwargs)
@@ -18,28 +20,26 @@ class ResizingCanvas(Canvas):
         # resize the canvas
         self.config(width=self.width, height=self.height)
         # rescale all the objects tagged with the "all" tag
-        self.scale("all", 0, 0, w_scale, h_scale)
+        self.scale(tkinter.ALL, 0, 0, w_scale, h_scale)
 
 
 def main():
-    root = Tk()
-    my_frame = Frame(root)
-    my_frame.pack(fill=BOTH, expand=YES)
-    my_canvas = ResizingCanvas(my_frame, width=850, height=400, bg="red", highlightthickness=0)
-    my_canvas.pack(fill=BOTH, expand=YES)
+    root = tkinter.Tk()
+    my_frame = tkinter.Frame(root)
+    my_frame.pack(fill=tkinter.BOTH, expand=tkinter.YES)
+    my_canvas = ResizingCanvas(my_frame, width=850, height=400, bg="red",
+                               highlightthickness=0)
+    my_canvas.pack(fill=tkinter.BOTH, expand=tkinter.YES)
 
     # add some widgets to the canvas
     my_canvas.create_line(0, 0, 200, 100)
     my_canvas.create_line(0, 100, 200, 0, fill="red", dash=(4, 4))
     my_canvas.create_rectangle(50, 25, 150, 75, fill="blue")
-    root.ok = False
 
-    def undo(event):
+    def undo(_: tkinter.Event):
         print("undo undo undo undo")
 
-    root.bind("<Command-u>", undo)
-    # tag all of the drawn widgets
-    my_canvas.addtag_all("all")
+    root.bind("<Control-u>", undo)
     root.mainloop()
 
 
