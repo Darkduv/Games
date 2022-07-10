@@ -21,7 +21,7 @@ class Player:
 
 class ComputerPlayer(Player):
     def __init__(self):
-        Player.__init__(self, "Computer")
+        super().__init__("Computer")
 
 
 class TwoPlayerGame:

@@ -126,7 +126,7 @@ class MenuBar(tkinter.Frame):
     """Drop-down menu bar"""
 
     def __init__(self):
-        tkinter.Frame.__init__(self, borderwidth=2, relief=tkinter.GROOVE)
+        super().__init__(borderwidth=2, relief=tkinter.GROOVE)
 
     def add_menu(self, menu: DropdownMenu):
         menu_button = menu.add_to_menu_bar(self)
@@ -147,7 +147,7 @@ class Panel(tkinter.Frame):
         # grid, we calculate the tallest size possible for the
         # cases (squared) of the grid, et the dimensions of the
         # canvas are adapted in consequence.
-        tkinter.Frame.__init__(self)
+        super().__init__()
         self.n_row, self.n_col = 4, 4  # initial grid = 4 x 4
         # Link of the event <resize> with an adapted manager :
         self.bind("<Configure>", self.rescale)

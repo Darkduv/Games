@@ -9,7 +9,7 @@ class Matrix(list):
 
     def __init__(self, nb_lig=0, nb_col=0, nb=0, list_=None):
         # print("cou_cou", list_)
-        list.__init__([])
+        super().__init__()
         if list_ is None:
             # print("it doesn't work")
             if nb_lig is [] or nb_lig == 0:
@@ -144,7 +144,7 @@ class Matrix(list):
 
 class SquareMatrix(Matrix):
     def __init__(self, nb_lig, nb=0):
-        Matrix.__init__(self, nb_lig, nb_lig, nb)
+        super().__init__(nb_lig, nb_lig, nb)
 
     def true_matrix(self):
         try:
@@ -172,7 +172,7 @@ class SquareMatrix(Matrix):
 
 class IdentityMatrix(SquareMatrix):
     def __init__(self, nb_lig, nb=1):
-        SquareMatrix.__init__(self, nb_lig)
+        super().__init__(nb_lig)
         for i in range(nb_lig):
             self[i][i] = nb
 

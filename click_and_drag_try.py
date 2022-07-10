@@ -11,7 +11,7 @@ class Draw(tkinter.Frame):
                 'green', 'cyan', 'blue', 'purple']
 
     def __init__(self):
-        tkinter.Frame.__init__(self)
+        super().__init__()
 
         # making the parameters storing data on the selected object :
         self.sel_object = None

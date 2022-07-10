@@ -135,7 +135,7 @@ class MenuBar(Frame):
     """Barre de menus scrolling"""
 
     def __init__(self, boss=None):
-        Frame.__init__(self, borderwidth=2, relief=GROOVE)
+        super().__init__(borderwidth=2, relief=GROOVE)
         # #### Menu <File> #####
         file_menu = Menubutton(self, text='File')
         file_menu.pack(side=LEFT, padx=5)
@@ -161,7 +161,7 @@ class Panel(Frame):
     """Panel de jeu (grille de n x m cases)"""
 
     def __init__(self):
-        Frame.__init__(self)
+        super().__init__()
         self.verified = True  # will contain if displacements still possible
         "Initialisation de la list de l'état du jeu"
         self.directions_possibles = ["Right", "Down", "Up", "Left"]
@@ -318,7 +318,7 @@ class JeuFinal(Frame):
     """corps principal du programme"""
 
     def __init__(self):
-        Frame.__init__(self)
+        super().__init__()
         self.master.geometry("500x400")
         self.master.title("Jeu de 2048")
 
