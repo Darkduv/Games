@@ -1,8 +1,12 @@
-from super_matrix import *
+"""Start the implementation of the 'template' of a game
+ with an artificial intelligence"""
+
+from super_matrix import SuperMatrix
 # Todo : TwoPlayersGame, EvalFunction, Player, Situation
 
 
 class Player:
+    """player class"""
 
     def __init__(self, name=""):
         self.name = name
@@ -16,7 +20,7 @@ class Player:
 
     @property
     def info_victories(self):
-        return self.name + " has won " + str(self._nb_victory) + " victories"
+        return f"{self.name} has won {self._nb_victory} victories"
 
 
 class ComputerPlayer(Player):
@@ -37,8 +41,3 @@ class Situation:
 
     def __str__(self):
         return self.state.__str__()
-
-
-
-
-
