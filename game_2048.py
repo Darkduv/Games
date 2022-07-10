@@ -1,12 +1,12 @@
 """
 ###########################################
 #                                         #
-#              Jeu de 2048                #
+#             Game of 2048                #
 #                                         #
 #                                         #
 #                                         #
 #                                         #
-#  Version du 29/02/2016 - License : Non  #
+#  Version of 10/07/2022 - License : GPL  #
 ###########################################
 """
 
@@ -178,7 +178,7 @@ class Grid:
 class MenuBar(tkinter.Frame):
     """Barre de menus scrolling"""
 
-    def __init__(self, boss=None):
+    def __init__(self, boss):
         super().__init__(borderwidth=2, relief=tkinter.GROOVE)
         # #### Menu <File> #####
         file_menu = tkinter.Menubutton(self, text='File')
@@ -195,14 +195,14 @@ class MenuBar(tkinter.Frame):
         help_menu.pack(side=tkinter.LEFT, padx=5)
         me1 = tkinter.Menu(help_menu)
         me1.add_command(label='Principe du jeu', underline=0,
-                        command=boss.principe)
+                        command=boss.principle)
         me1.add_command(label='More ...', underline=0,
-                        command=boss.by_the_way)
+                        command=boss.about)
         help_menu.configure(menu=me1)
 
 
 class Panel(tkinter.Frame):
-    """Panel de jeu (grille de n x m cases)"""
+    """Game panel (game with graphic part)"""
 
     def __init__(self):
         super().__init__()
@@ -216,15 +216,9 @@ class Panel(tkinter.Frame):
         # self.can.bind("<Configure>", self.re_scale)
         self.can.pack()
 
-        # weigh et height maximal possible  for the squares :
-        l_max = self.winfo_width() // self.n_col
-        h_max = self.winfo_height() // self.n_row
-        # the side of the square will be the smallest of these dimensions :
-        self.cote = min(l_max, h_max)
+        self.init_game()
 
-        self.init_jeu()
-
-    def init_jeu(self):
+    def init_game(self):
         """beginning of the Game"""
         # Link of the event <key of the keyboard>to his manager :
         self.matrix = Grid()
@@ -238,8 +232,9 @@ class Panel(tkinter.Frame):
     # self.draw_grid(width, height)
 
     def lost(self) -> None:
-        message = self.can.create_text(2 * self.cote, 2 * self.cote, text="",
-                                       font="Helvetica 30 bold",
+        square_size = self.square_side
+        message = self.can.create_text(2 * square_size, 2 * square_size,
+                                       text="", font="Helvetica 30 bold",
                                        fill='Black')
         for _ in range(5):
             self.can.itemconfig(message, text="You've lost!")
@@ -249,25 +244,33 @@ class Panel(tkinter.Frame):
             self.can.update()
             self.can.after(150)
 
-    def draw_grid(self):
-        """Layout of the grid, according to des options & dimensions"""
-        # -> establishment of news dimensions for the canvas :
-        # weigh et height maximal possible  for the squares :
+    @property
+    def square_side(self):
+        #  maximum possible width and height for the squares :
         l_max = self.winfo_width() // self.n_col
         h_max = self.winfo_height() // self.n_row
         # the side of the square will be the smallest of these dimensions :
-        self.cote = min(l_max, h_max)
-        (width, height) = (self.cote * self.n_col, self.cote * self.n_row)
+        return min(l_max, h_max)
+
+    @property
+    def shape(self):
+        return self.square_side * self.n_col, self.square_side * self.n_row
+
+    def draw_grid(self):
+        """Layout of the grid, according to des options & dimensions"""
+        # -> Configuration of the new canvas dimensions :
+        width, height = self.shape
         self.can.configure(width=width, height=height)
         # Layout of the grid :
         self.can.delete(tkinter.ALL)  # Effacement older paints
-        s = self.cote
+        square_size = self.square_side
+        s = square_size
         # horizontal lines and vertical ones because n_row = n_col
         for _ in range(self.n_row - 1):
             self.can.create_line(0, s, width, s, fill="black")
             self.can.create_line(s, 0, s, height, fill="black")
-            s += self.cote
-        c = self.cote
+            s += square_size
+        c = square_size
         for i in range(4):
             for j in range(4):
                 power = self.matrix.power[i][j]
@@ -282,8 +285,8 @@ class Panel(tkinter.Frame):
         # Layout of all the numbers :
         for r in range(self.n_row):
             for c in range(self.n_col):
-                x = int((c + 1 / 2) * self.cote)
-                y = int((r + 1 / 2) * self.cote)
+                x = int((c + 1 / 2) * square_size)
+                y = int((r + 1 / 2) * square_size)
                 # self.can.create_rectangle()
                 self.can.create_text(x, y, text=str(self.matrix.matrix[r][c]),
                                      font="Helvetica 30 normal", fill="black")
@@ -317,17 +320,17 @@ class Game2048(tkinter.Frame):
         self.m_bar = MenuBar(self)
         self.m_bar.pack(side=tkinter.TOP, expand=tkinter.NO, fill=tkinter.X)
 
-        self.jeu = Panel()
-        self.jeu.pack(expand=tkinter.YES, fill=tkinter.BOTH, padx=8, pady=8)
+        self.game = Panel()
+        self.game.pack(expand=tkinter.YES, fill=tkinter.BOTH, padx=8, pady=8)
 
         self.pack()
 
     def reset(self):
         """with the menu, reset the game"""
-        self.jeu.init_jeu()
-        self.jeu.draw_grid()
+        self.game.init_game()
+        self.game.draw_grid()
 
-    def principe(self):
+    def principle(self):
         """window-message containing la description rapid du principe du jeu"""
         msg = tkinter.Toplevel(self)
         tkinter.Message(
@@ -344,12 +347,12 @@ class Game2048(tkinter.Frame):
                  "if you couldn't any lore do a move.") \
             .pack(padx=10, pady=10)
 
-    def by_the_way(self):
+    def about(self):
         """window-message indicating author and type of the licence"""
         msg = tkinter.Toplevel(self)
         tkinter.Message(msg, width=200, aspect=100, justify=tkinter.CENTER,
-                        text="2048 \n\n coding by Max. Duv. , February 2016.\n"
-                        "Licence = none").pack(padx=10, pady=10)
+                        text="2048 \n\n coded by Max. Duv. , July 2022.\n"
+                        "Licence = GPL").pack(padx=10, pady=10)
 
 
 if __name__ == '__main__':
