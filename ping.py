@@ -171,7 +171,7 @@ class Panel(tkinter.Frame):
         # contain all the new sizes of the panel :
         self.width, self.height = event.width - 4, event.height - 4
         # The subtraction of 4 pixels is here to compensate the width
-        # of the 'highlight bordure' rolling the canvas)
+        # of the 'highlight bordure' rolling the canvas
         self.draw_board()
 
     @property
