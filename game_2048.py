@@ -18,6 +18,8 @@ from typing import Tuple
 
 import numpy as np
 
+from game_tools import gui
+
 
 class InvalidError(Exception):
     """Custom error raised if something invalid is done"""
@@ -311,21 +313,27 @@ class Panel(tkinter.Frame):
                 self.lost()
 
 
-class Game2048(tkinter.Frame):
+class Game2048(tkinter.Tk):
     """Main body of the game"""
 
     def __init__(self):
         super().__init__()
-        self.master.geometry("500x400")
-        self.master.title("Jeu de 2048")
+        self.geometry("500x400")
+        self.title("Jeu de 2048")
 
-        self.m_bar = MenuBar(self)
-        self.m_bar.pack(side=tkinter.TOP, expand=tkinter.NO, fill=tkinter.X)
+        menu_config = [
+            ("File", [('Restart', self.reset), ('Quit', self.destroy)]),
+            ('Help', [('Principe du jeu', self.principle),
+                      ('About...', self.about)])
+        ]
+        self.m_bar = gui.RecursiveMenuBar(self)
+        self.m_bar.config_menu(menu_config)
+        # self.m_bar.pack(side=tkinter.TOP, expand=tkinter.NO, fill=tkinter.X)
 
         self.game = Panel()
         self.game.pack(expand=tkinter.YES, fill=tkinter.BOTH, padx=8, pady=8)
 
-        self.pack()
+        # self.pack()
 
     def reset(self):
         """with the menu, reset the game"""
