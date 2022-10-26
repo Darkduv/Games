@@ -30,6 +30,9 @@ CYAN, YELLOW = (0, 255, 255), (255, 255, 0)
 ORANGE = (255, 165, 0)
 PURPLE = (128, 0, 128)
 
+# Define Font
+FONT = 'comicsans'
+
 # SHAPE FORMATS
 
 shape_S = [['.....',
@@ -142,8 +145,8 @@ shape_colors = [GREEN, RED, CYAN, YELLOW, ORANGE, BLUE, PURPLE]
 
 
 class Piece(object):
-    rows = 20  # y
-    columns = 10  # x
+    # rows = 20  # y
+    # columns = 10  # x
     _shapes = shapes
     _shape_colors = shape_colors
 
@@ -189,7 +192,8 @@ def convert_shape_format(shape):
 
 
 def valid_space(shape, grid):
-    accepted_positions = [[(j, i) for j in range(10) if grid[i][j] == (0, 0, 0)] for i in range(20)]
+    accepted_positions = [[(j, i) for j in range(10)
+                           if grid[i][j] == (0, 0, 0)] for i in range(20)]
     accepted_positions = [j for sub in accepted_positions for j in sub]
     formatted = convert_shape_format(shape)
 
@@ -210,7 +214,7 @@ def check_lost(positions):
 
 
 def draw_text_middle(text, size, color, surface):
-    font = pygame.font.SysFont('comicsans', size, bold=True)
+    font = pygame.font.SysFont(FONT, size, bold=True)
     label = font.render(text, True, color)
 
     surface.blit(label, (top_left_x + play_width / 2 - (label.get_width() / 2),
@@ -252,7 +256,7 @@ def clear_rows(grid, locked):
 
 
 def draw_next_shape(shape, surface):
-    font = pygame.font.SysFont('comicsans', 30)
+    font = pygame.font.SysFont(FONT, 30)
     label = font.render('Next Shape', True, (255, 255, 255))
 
     sx = top_left_x + play_width + 50
@@ -272,7 +276,7 @@ def draw_next_shape(shape, surface):
 def draw_window(surface):
     surface.fill(BLACK)
     # Tetris Title
-    font = pygame.font.SysFont('comicsans', 60)
+    font = pygame.font.SysFont(FONT, 60)
     label = font.render('TETRIS', True, WHITE)
 
     surface.blit(label,
@@ -318,12 +322,17 @@ def main():
             if not (valid_space(current_piece, grid)) and current_piece.y > 0:
                 current_piece.y -= 1
                 change_piece = True
-
-        for event in pygame.event.get():
+        def test():
+            ll = pygame.event.get()
+            if len(ll) > 1:
+                print("YAYAAAYAY", ll)
+            return ll
+        for event in test():  #  pygame.event.get():
+            # print(event.type, event, pygame.event.get())
             if event.type == pygame.QUIT:
                 run = False
                 pygame.display.quit()
-                quit()
+                return
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
@@ -351,8 +360,10 @@ def main():
                 if event.key == pygame.K_SPACE:
                     # move shape down
                     current_piece.y += 1
+                    print("youhou")
                     if not valid_space(current_piece, grid):
                         current_piece.y -= 1
+                        print("ah zut")
 
                 '''if event.key == pygame.K_SPACE:
                    while valid_space(current_piece, grid):
@@ -405,7 +416,7 @@ def main_menu():
 
             if event.type == pygame.KEYDOWN:
                 main()
-    pygame.quit()
+    # pygame.quit()
 
 
 win = pygame.display.set_mode((s_width, s_height))
