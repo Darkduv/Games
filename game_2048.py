@@ -179,32 +179,6 @@ class Grid:
         return False
 
 
-class MenuBar(tkinter.Frame):
-    """Barre de menus scrolling"""
-
-    def __init__(self, boss):
-        super().__init__(borderwidth=2, relief=tkinter.GROOVE)
-        # #### Menu <File> #####
-        file_menu = tkinter.Menubutton(self, text='File')
-        file_menu.pack(side=tkinter.LEFT, padx=5)
-        me1 = tkinter.Menu(file_menu)
-        me1.add_command(label='Restart', underline=0,
-                        command=boss.reset)
-        me1.add_command(label='Quit', underline=0,
-                        command=boss.quit)
-        file_menu.configure(menu=me1)
-
-        # #### Menu <Help> #####
-        help_menu = tkinter.Menubutton(self, text='Help')
-        help_menu.pack(side=tkinter.LEFT, padx=5)
-        me1 = tkinter.Menu(help_menu)
-        me1.add_command(label='Principe du jeu', underline=0,
-                        command=boss.principle)
-        me1.add_command(label='More ...', underline=0,
-                        command=boss.about)
-        help_menu.configure(menu=me1)
-
-
 class Panel(tkinter.Frame):
     """Game panel (game with graphic part)"""
 
