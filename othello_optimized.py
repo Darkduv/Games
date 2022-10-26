@@ -14,6 +14,8 @@ import tkinter
 from typing import Tuple, TypeAlias
 import numpy as np
 
+from game_tools import gui
+
 Position: TypeAlias = Tuple[int, int]
 
 
@@ -104,32 +106,6 @@ class Grid:
                 or self.grid[i, j] != player:
             return []
         return l_flip_pos
-
-
-class MenuBar(tkinter.Frame):
-    """Bar of dropdown menus"""
-
-    def __init__(self, boss=None):
-        super().__init__(borderwidth=2, relief=tkinter.GROOVE)
-        # #### Menu <File> #####
-        file_menu = tkinter.Menubutton(self, text='File')
-        file_menu.pack(side=tkinter.LEFT, padx=5)
-        me1 = tkinter.Menu(file_menu)
-        me1.add_command(label='Restart', underline=0,
-                        command=boss.reset)
-        me1.add_command(label='Quit', underline=0,
-                        command=boss.quit)
-        file_menu.configure(menu=me1)
-
-        # #### Menu <Help> #####
-        help_menu = tkinter.Menubutton(self, text='Help')
-        help_menu.pack(side=tkinter.LEFT, padx=5)
-        me1 = tkinter.Menu(help_menu)
-        me1.add_command(label='Principle of the game', underline=0,
-                        command=boss.principle)
-        me1.add_command(label='About', underline=0,
-                        command=boss.about)
-        help_menu.configure(menu=me1)
 
 
 class Panel(tkinter.Frame):
@@ -306,21 +282,25 @@ class Panel(tkinter.Frame):
         self.trace_grille()
 
 
-class Othello(tkinter.Frame):
+class Othello(tkinter.Tk):
     """Main window and manager of othello game"""
 
     def __init__(self):
         super().__init__()
-        self.master.geometry("890x673")
-        self.master.title(" Jeu de Othello")
+        self.geometry("890x673")
+        self.title(" Jeu de Othello")
 
-        self.m_bar = MenuBar(self)
-        self.m_bar.pack(side=tkinter.TOP, expand=tkinter.NO, fill=tkinter.X)
+        menu_config = [
+            ("File", [('Restart', self.reset), ('Quit', self.destroy)]),
+            ('Help', [('Principe du jeu', self.principle),
+                      ('About...', self.about)])
+        ]
+
+        self.m_bar = gui.RecursiveMenuBar(self)
+        self.m_bar.config_menu(menu_config)
 
         self.jeu = Panel()
         self.jeu.pack(expand=tkinter.YES, fill=tkinter.BOTH, padx=8, pady=8)
-
-        self.pack()
 
     def reset(self):
         """  french!  """
